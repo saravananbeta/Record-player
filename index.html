@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Record player</title>
+  
+  <!-- Cursive Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;ic
+      background-color: #000;
+      color: #fff;
+    }
+   /* Fullscreen Background Image */
+ .bg-image {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover !important;
+  object-position: top center;
+  z-index: 1;
+  pointer-events: none;
+}
+
+    /* Fullscreen Background Image */
+   @media (max-width: 600px) {
+      .bg-image {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover !important;
+  object-position: bottom left;
+  z-index: 1;
+  pointer-events: none;
+}
+      
+      /* ... your existing mobile styles ... */
+    }
+
+    /* Cursive Title at Top Left */
+    .app-header {
+      position: fixed;
+      top: 25px;
+      left: 35px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .app-header h1 {
+      font-family: 'Great Vibes', 'Brush Script MT', cursive;
+      font-size: 3.4rem;
+      font-weight: 400;
+      color: #ffb703;
+      text-shadow: 0 3px 12px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.8);
+      line-height: 1;
+    }
+
+    /* Top Right Container for Clock & Mute Button */
+    .top-right-container {
+      position: fixed;
+      top: 25px;
+      right: 35px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    /* Digital Time Display at Top Right */
+    .time-display {
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+      pointer-events: none;
+    }
+
+    /* Mute Button below Clock */
+    .mute-btn {
+      background: rgba(0, 0, 0, 0.6);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .mute-btn:hover {
+      background: rgba(0, 0, 0, 0.85);
+    }
+
+.controls button {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #ffffff;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  /* Kill native iOS/Android touch highlights */
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  outline: none !important;
+}
+
+/* Force dark style on touch focus, active, and native hover states */
+.controls button:focus,
+.controls button:active,
+.controls button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Desktop-only hover (Will NOT trigger on touchscreens) */
+@media (hover: hover) and (pointer: fine) {
+  .controls button:hover {
+    background: #ffb703 !important;
+    color: #000000 !important;
+  }
+}
+
+/* Temporary 1-second JS class (The ONLY way a button turns yellow on mobile) */
+.controls button.is-pressed {
+  background: #ffb703 !important;
+  color: #000000 !important;
+}
+
+ /* Persistent Shuffle Active Class */
+.controls button.is-active {
+  background: #ffb703 !important;
+  color: #000000 !important;
+}   
+    /* Minimalist Player Bar Overlay - Expanded Length */
+    /* Base Player Bar (Desktop & Laptops) */
+.player-bar {
+  position: fixed;
+  bottom: 35px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 16px;                     /* Increased spacing between buttons */
+  padding: 12px 28px;            /* Roomier padding */
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  transform-origin: bottom center;
+}
+
+/* Enlarge song title text & container on desktop */
+.track-info {
+  max-width: 220px;              /* Gives song title more room */
+  font-size: 1rem;
+}
+
+/* Enlarge volume slider on desktop */
+.volume-container input[type="range"] {
+  width: 80px;
+}
+    /* Thumbnail inside the player */
+    .thumb {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid #ffb703;
+      flex-shrink: 0;
+    }
+
+    .track-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 240px;
+      overflow: hidden;
+    }
+
+    /* Small Font Real Track Title with Truncation */
+    .track-title {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+    }
+
+    .track-sub {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.68rem;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-top: 2px;
+    }
+
+    /* Editable Track Input Field */
+    .track-input {
+      width: 32px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 4px;
+      color: #ffb703;
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-align: center;
+      outline: none;
+      padding: 0 2px;
+      transition: all 0.2s ease;
+    }
+
+    .track-input:focus {
+      border-color: #ffb703;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    /* Remove Spinners/Arrows from Number Input */
+    .track-input::-webkit-outer-spin-button,
+    .track-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .track-input[type=number] {
+      -moz-appearance: textfield;
+    }
+ 
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .controls button {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+    }
+
+    .controls button:hover {
+      background: #ffb703;
+      color: #000;
+    }
+
+    /* Volume Control inside Player Bar */
+    .volume-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      margin-left: 2px;
+      flex-shrink: 0;
+    }
+
+    .volume-container input[type="range"] {
+      width: 60px;
+      accent-color: #ffb703;
+      cursor: pointer;
+    }
+    /* Force Play button to stay dark while playing, even on mobile touch */
+   #playBtn:not(.is-paused) {
+   background: rgba(255, 255, 255, 0.1) !important;
+   color: #ffffff !important;
+   }
+
+    #playBtn.is-paused {
+    background: #ffb703 !important;
+    color: #000000 !important;
+   }
+    /* Simple Underlined Text Link at Bottom Right Corner */
+    .yt-link-text {
+      position: fixed;
+      bottom: 25px;
+      right: 35px;
+      z-index: 100;
+      color: #ffb703;
+      text-decoration: underline;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+      transition: color 0.2s ease;
+    }
+
+    .yt-link-text:hover {
+      color: #ffffff;
+    }
+
+    /* Hidden YouTube Audio Engine */
+    .audio-engine {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 1px;
+      height: 1px;
+      opacity: 0.01;
+      pointer-events: none;
+      z-index: -1;
+    }
+    /* Mobile Responsive Enhancements */
+    /* Mobile Responsive Styles */
+    @media (max-width: 600px) {
+      .bg-image {
+        object-fit: cover !important;
+        object-position: center center !important;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .app-header {
+        top: 15px;
+        left: 20px;
+      }
+
+      .app-header h1 {
+        font-size: 2.2rem;
+      }
+
+      .top-right-container {
+        top: 20px;
+        right: 20px;
+      }
+
+      .time-display {
+        font-size: 0.85rem;
+      }
+      .listener-count {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #ffffff;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+       pointer-events: none;
+    }
+    
+      .player-bar {
+        bottom: 45px;
+        gap: 8px;
+        padding: 6px 12px;
+        max-width: 95vw;
+      }
+
+      .track-info {
+        max-width: 100px;
+      }
+
+      .volume-container input[type="range"] {
+        width: 45px;
+      }
+
+      .yt-link-text {
+        bottom: 12px;
+        right: 50%;
+        transform: translateX(50%);
+        font-size: 0.75rem;
+        white-space: nowrap;
+      }
+    }  
+  </style>
+</head>
+<body>
+ 
+  <!-- Responsive Background Image Container -->
+<picture>
+  <!-- Mobile Image (loaded only on screens 600px wide or smaller) -->
+  <source media="(max-width: 600px)" srcset="chitrahaar-mobile-bg.jpg" />
+  
+  <!-- Default / Desktop Image -->
+  <img src="Record_player_bg.jpg" alt="Background" class="bg-image" />
+</picture>
+
+  <!-- Cursive Title at Top Left -->
+  <header class="app-header">
+    <h1>Record Player Days</h1>
+  </header>
+
+  <!-- Digital Time Display & Mute Button at Top Right -->
+  <div class="top-right-container">
+    <div id="clockDisplay" class="time-display">00:00</div>
+    <div id="listenerCount" class="listener-count">Online: --</div>
+    <button id="muteBtn" class="mute-btn" aria-label="Toggle Sound">
+      <span id="muteIcon">🔇</span>
+    </button>
+  </div>
+
+  <!-- Minimalist Radio Player (Centered at Bottom) -->
+  <div class="player-bar">
+    <img id="trackThumb" src="" alt="Thumb" class="thumb" />
+    
+    <div class="track-info">
+      <span id="trackTitle" class="track-title" title="Track Title">Loading Title...</span>
+      <div class="track-sub">
+        <input 
+          type="number" 
+          id="trackInput" 
+          class="track-input" 
+          min="1" 
+          max="52" 
+          value="1" 
+          onchange="jumpToTrack(this.value)"
+          onkeydown="if(event.key==='Enter') this.blur()"
+        />
+        <span>/52</span>
+      </div>
+    </div>
+
+  <div class="controls">
+  <button id="shuffleBtn" onclick="toggleShuffle()" title="Shuffle">&#x1F500;&#xFE0E;</button>  
+  <button id="playBtn" onclick="togglePlay()" title="Play/Pause">▶</button>
+  <button onclick="nextTrack(event)" title="Next">▶▶</button>
+  </div>
+
+    <div class="volume-container">
+      <span>🔊</span>
+      <input type="range" id="volumeSlider" min="0" max="100" value="80" oninput="setVolume(this.value)" />
+    </div>
+  </div>
+  <!-- Underlined Text Link at Bottom Right Corner -->
+  <a href="https://www.youtube.com/playlist?list=PLLSmtLkEWFA8D1LSqO6dCO0UMLxVkvdI6" target="_blank" class="yt-link-text" rel="noopener noreferrer">Listen on YouTube</a>
+
+  <!-- Offscreen YouTube Iframe Engine for Audio Only -->
+  <div id="player" class="audio-engine"></div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    /* Digital Clock Logic */
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('clockDisplay').innerText = `${hours}:${minutes}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    /* Playlist Data & Audio Logic */
+    const playlist = [
+
+      "6meifsU2vwI", "0p1hI3-ZXaQ", "XMEJZbkQCBE", "zjAOJ9xOP-w", "G97Q6mVk4yc", "RzSTszcoqm0", "sc4pV709YMk", "dUTn9N0OgfQ",
+      "D-_VfDf2NTk", "eegBPdAhg7U", "5cmfqO-e020", "FMwt_ANhryY", "AGuuEpdDpTY", "P-p0zdfAUXg", "MkNptelLpV0", "gvBo0RVbInY",
+      "NdnCxcEderU", "xK8NF1XaWBA", "xO1RW80P8YU", "52kDVborPjQ", "RJXrqY-Df1M", "PkWkcpsGYRQ", "9vDKA33y4oo", "UdHkw4ZQo2E",
+      "Gprz9oXErV0", "AtrOLDpmaT8", "usRpe2nB3MY", "4rvNInoT6Sc", "g2Q0-XY4BeA", "oXOs-ytaqD0", "ywMG5HRCpEs", "rUmL6PFD1OE",
+      "_scVrJf6buE", "s4TdHTtuVQ8", "Uk-lLhl6MVM", "iyk3ofoFlf4", "C9muhp0Upuc", "Yhrp0_XgjdQ", "cDa6NVy-x0I", "LgIqmSMsNTw",
+      "xCwuhwiZ00M", "pqgAS7mzZjA", "swwSwwbj3Uo", "Lzp6VkMms-0", "tyrM-W29EhU?", "pmAkQt-Ti3U", "nvrsBUrgS4s", "DNmVHa3VdNQ",
+      "-8BlsbYbolY", "shPRgjoiJhw", "tQ55acTpSWs", "_mGU-o8ap_g"
+    ];
+
+    // Correctly set initial index to a random position within the array bounds
+   var playlistLength = typeof playlist !== 'undefined' ? playlist.length : 50;
+let isShuffleOn = false;    
+//let currentIndex = Math.floor(Math.random() * playlistLength); starting with a randon tracj
+let currentIndex = 0;    
+let ytPlayer;
+let isAudioMuted = true; // State tracker
+
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player('player', {
+    height: '1',
+    width: '1',
+    videoId: playlist[currentIndex],
+    playerVars: { 
+      'autoplay': 1,      
+      'mute': 1,          
+      'controls': 0,
+      'playsinline': 1
+    },
+    events: {
+      'onReady': function(event) {
+        if (isAudioMuted) {
+          event.target.mute();
+        } else {
+          event.target.unMute();
+          event.target.setVolume(100);
+        }
+        event.target.loadVideoById(playlist[currentIndex]);
+        updateMuteUI(); 
+        updateUI(event);
+      },
+      'onStateChange': onPlayerStateChange,
+      'onError': onPlayerError
+    }
+  });
+}
+
+// Global listener: Unmute on first click anywhere outside the mute button
+document.addEventListener('click', function unmuteOnFirstClick(e) {
+  if (e.target.closest('#muteBtn')) return; // Let the button handler manage its own click
+
+  if (isAudioMuted) {
+    isAudioMuted = false;
+    if (ytPlayer && typeof ytPlayer.unMute === 'function') {
+      ytPlayer.unMute();
+      ytPlayer.setVolume(100);
+    }
+    updateMuteUI();
+  }
+}, { once: true });
+
+// Dedicated Mute/Unmute Button Handler
+document.addEventListener('DOMContentLoaded', function() {
+  const muteBtn = document.getElementById('muteBtn');
+  if (muteBtn) {
+    muteBtn.addEventListener('click', function() {
+      isAudioMuted = !isAudioMuted;
+
+      if (ytPlayer && typeof ytPlayer.unMute === 'function') {
+        if (isAudioMuted) {
+          ytPlayer.mute();
+        } else {
+          ytPlayer.unMute();
+          ytPlayer.setVolume(100);
+        }
+      }
+      updateMuteUI();
+    });
+  }
+});
+
+// Sync icon strictly based on state variable
+function updateMuteUI() {
+  const muteIcon = document.getElementById('muteIcon');
+  const muteBtn = document.getElementById('muteBtn');
+  if (!muteIcon) return;
+
+  if (isAudioMuted) {
+    muteIcon.textContent = '🔇'; // MUTED
+    if (muteBtn) muteBtn.classList.add('is-muted');
+  } else {
+    muteIcon.textContent = '🔊'; // UNMUTED
+    if (muteBtn) muteBtn.classList.remove('is-muted');
+  }
+}
+
+if (window.YT && window.YT.Player) {
+  onYouTubeIframeAPIReady();
+}
+    
+    function updateUI() {
+      const id = playlist[currentIndex];
+      document.getElementById('trackThumb').src = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+      document.getElementById('trackInput').value = currentIndex + 1;
+      
+      // Temporary title until YouTube returns actual title
+      fetchTrackTitle();
+    }
+
+    function fetchTrackTitle() {
+      if (ytPlayer && ytPlayer.getVideoData) {
+        const title = ytPlayer.getVideoData().title;
+        if (title) {
+          document.getElementById('trackTitle').innerText = title;
+          document.getElementById('trackTitle').title = title;
+          return;
+        }
+      }
+      document.getElementById('trackTitle').innerText = `Track ${currentIndex + 1}`;
+    }
+
+    function jumpToTrack(val) {
+      let num = parseInt(val, 10);
+      if (isNaN(num)) return;
+
+      if (num < 1) num = 1;
+      if (num > playlist.length) num = playlist.length;
+
+      currentIndex = num - 1;
+      loadCurrentTrack();
+    }
+
+    function togglePlay() {
+      if (!ytPlayer) return;
+      const state = ytPlayer.getPlayerState();
+      if (state === YT.PlayerState.PLAYING) {
+        ytPlayer.pauseVideo();
+      } else {
+        ytPlayer.playVideo();
+      }
+    }
+
+    function toggleShuffle() {
+    isShuffleOn = !isShuffleOn;
+    const btn = document.getElementById('shuffleBtn');
+      if (btn) {
+      if (isShuffleOn) {
+        btn.classList.add('is-active');
+      }   else {
+        btn.classList.remove('is-active');
+      }
+    }
+  }
+   // Flash animation handler
+function flashButton(btn) {
+  if (!btn || !(btn instanceof HTMLElement)) return;
+
+  // Clear any existing timer
+  if (btn._timer) clearTimeout(btn._timer);
+
+  btn.classList.add('is-pressed');
+
+  btn._timer = setTimeout(function() {
+    btn.classList.remove('is-pressed');
+    btn.blur();
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+  }, 1000);
+}
+
+function nextTrack(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const btn = e ? (e.currentTarget || e.target) : null;
+  flashButton(btn);
+
+  currentIndex = (currentIndex + 1) % playlist.length;
+  renderTrackChange();
+}
+
+function prevTrack(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const btn = e ? (e.currentTarget || e.target) : null;
+  flashButton(btn);
+
+  currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+  renderTrackChange();
+}
+
+function renderTrackChange() {
+  const currentNum = currentIndex + 1;
+
+  // 1. Update On-Screen Display First
+  // Finds trackInput whether it's an id="trackInput", class="trackInput", or name="trackInput"
+  const trackElem = document.getElementById('trackInput') 
+                 || document.querySelector('.trackInput') 
+                 || document.querySelector('[name="trackInput"]');
+
+  if (trackElem) {
+    if ('value' in trackElem) {
+      trackElem.value = currentNum;
+      trackElem.setAttribute('value', currentNum); // Forces mobile browsers to re-render input value
+    }
+    trackElem.textContent = currentNum;
+  }
+
+  // 2. Load YouTube Track
+  if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+    ytPlayer.loadVideoById(playlist[currentIndex]);
+  }
+}
+function jumpToTrack(val) {
+  let requestedNum = parseInt(val, 10);
+
+  // Validate the entered number against playlist range
+  if (!isNaN(requestedNum) && requestedNum >= 1 && requestedNum <= playlist.length) {
+    currentIndex = requestedNum - 1;
+    renderTrackChange();
+  } else {
+    // Reset back to current valid track if out of bounds or empty
+    const trackElem = document.getElementById('trackInput');
+    if (trackElem) {
+      trackElem.value = currentIndex + 1;
+    }
+  }
+}
+    
+// Automatically bind touch-blur handlers to all control buttons on mobile load
+document.addEventListener('DOMContentLoaded', function() {
+  const buttons = document.querySelectorAll('.controls button');
+  buttons.forEach(function(btn) {
+    btn.addEventListener('touchend', function() {
+      // Strips touch focus immediately when finger leaves screen
+      setTimeout(() => btn.blur(), 50);
+    });
+  });
+});
+    function setVolume(val) {
+      if (ytPlayer && ytPlayer.setVolume) {
+        ytPlayer.setVolume(val);
+      }
+    }
+
+    /*function onPlayerStateChange(event) {
+      const btn = document.getElementById('playBtn');
+      if (event.data === YT.PlayerState.PLAYING) {
+        btn.innerText = '⏸';
+        fetchTrackTitle();
+      } else if (event.data === YT.PlayerState.PAUSED) {
+        btn.innerText = '▶';
+      } else if (event.data === YT.PlayerState.ENDED) {
+        currentIndex = Math.floor(Math.random() * playlist.length);
+        renderTrackChange();
+      }
+    }  */
+
+  // Helper to choose next song based on shuffle state
+function playNextOrRandom() {
+  if (isShuffleOn) {
+    let randomIndex = Math.floor(Math.random() * playlist.length);
+    // Optional: prevent playing the exact same track twice in a row if playlist > 1
+    if (playlist.length > 1 && randomIndex === currentIndex) {
+      randomIndex = (randomIndex + 1) % playlist.length;
+    }
+    currentIndex = randomIndex;
+    renderTrackChange();
+  } else {
+    // Normal sequential playback
+    currentIndex = (currentIndex + 1) % playlist.length;
+    renderTrackChange();
+  }
+}
+
+// Update state change handler
+function onPlayerStateChange(event) {
+  const btn = document.getElementById('playBtn');
+  if (event.data === YT.PlayerState.PLAYING) {
+    btn.innerText = '⏸';
+    btn.classList.remove('is-paused');
+    fetchTrackTitle();
+  } else if (event.data === YT.PlayerState.PAUSED) {
+    btn.innerText = '▶';
+    btn.classList.add('is-paused');
+  } else if (event.data === YT.PlayerState.ENDED) {
+    playNextOrRandom(); // Replaces direct Math.random() call
+  }
+}
+
+// Update error handler
+function onPlayerError(event) {
+  console.warn(`Track ${currentIndex + 1} is unplayable. Skipping...`);
+  playNextOrRandom(); // Respects shuffle when a track fails to load
+}
+    
+  // Initialize with a random starting count between 10 and 25
+let currentCount = Math.floor(Math.random() * (25 - 10 + 1)) + 10;
+
+function updateFakeListeners() {
+  const countElem = document.getElementById('listenerCount');
+  
+  if (countElem) {
+    // Update DOM with current count
+    countElem.innerText = `Online: ${currentCount}`;
+    
+    // Generate a delta between -2 and +2
+    const delta = Math.floor(Math.random() * 5) - 2;
+    
+    // Apply delta, ensuring the count doesn't drop below 0
+    currentCount = Math.max(5, currentCount + delta);
+  }
+}
+
+// Run immediately on page load
+updateFakeListeners();
+
+// Update every 15 seconds (10000 ms)
+setInterval(updateFakeListeners, 15000);
+
+    
+  </script>
+</body>
+</html>
