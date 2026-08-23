@@ -685,6 +685,7 @@ function renderTrackChange() {
   // 2. Load YouTube Track
   if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
     ytPlayer.loadVideoById(playlist[currentIndex]);
+     updateUI();   //Newly added line.
   }
 }
 function jumpToTrack(val) {
