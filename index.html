@@ -204,8 +204,13 @@
 
     /* To make the thumbnaikl rotate  */
     .thumb {      
-  animation: slowRotate 8s linear infinite;   
+  animation: slowRotate 8s linear infinite;
+  animation-play-state: paused;
   }
+
+  .thumb.is-playing {
+  animation-play-state: running;
+ }   
 
   @keyframes slowRotate {
   from {
@@ -781,13 +786,16 @@ function onPlayerStateChange(event) {
   if (event.data === YT.PlayerState.PLAYING) {
     btn.innerText = '⏸';
     btn.classList.remove('is-paused');
+    document.getElementById('trackThumb').classList.add('is-playing');
     fetchTrackTitle();
 
   } else if (event.data === YT.PlayerState.PAUSED) {
     btn.innerText = '▶';
     btn.classList.add('is-paused');
+    document.getElementById('trackThumb').classList.remove('is-playing');
 
   } else if (event.data === YT.PlayerState.ENDED) {
+    document.getElementById('trackThumb').classList.remove('is-playing');
     playNextOrRandom();
   }
 }   
