@@ -502,7 +502,7 @@ let currentIndex = 0;
 let ytPlayer;
 let isAudioMuted = true; // State tracker
 
- function onYouTubeIframeAPIReady() {
+/* function onYouTubeIframeAPIReady() {
   ytPlayer = new YT.Player('player', {
     height: '1',
     width: '1',
@@ -529,7 +529,33 @@ let isAudioMuted = true; // State tracker
       'onError': onPlayerError
     }
   });
-}     
+}      */
+
+// Updated to make player load the song - unmute, pause and wait for the user to click Play.    
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player('player', {
+    height: '1',
+    width: '1',
+    videoId: playlist[currentIndex],
+    playerVars: { 
+      'autoplay': 1,
+      'mute': 1,
+      'controls': 0,
+      'playsinline': 1
+    },
+    events: {
+      'onReady': function(event) {
+        event.target.mute();
+        event.target.setVolume(90);
+
+        updateMuteUI();
+        updateUI(event);
+      },
+      'onStateChange': onPlayerStateChange,
+      'onError': onPlayerError
+    }
+  });
+}    
 
 
 // Global listener: Unmute on first click anywhere outside the mute button
@@ -759,7 +785,7 @@ function playNextOrRandom() {
 }
 
 // Update state change handler
-function onPlayerStateChange(event) {
+/* function onPlayerStateChange(event) {
   const btn = document.getElementById('playBtn');
   if (event.data === YT.PlayerState.PLAYING) {
     btn.innerText = '⏸';
@@ -771,7 +797,47 @@ function onPlayerStateChange(event) {
   } else if (event.data === YT.PlayerState.ENDED) {
     playNextOrRandom(); // Replaces direct Math.random() call
   }
-}
+} */
+
+ let initialLoad = true;  //Player will load  the song, unmute and pause, for the user to click Play.
+
+function onPlayerStateChange(event) {
+  const btn = document.getElementById('playBtn');
+
+  // Initial autoplay is only used to force YouTube to load/buffer
+  // the song on mobile. As soon as it starts playing, pause it.
+  if (initialLoad && event.data === YT.PlayerState.PLAYING) {
+    initialLoad = false;
+
+    event.target.pauseVideo();
+    event.target.unMute();
+    event.target.setVolume(100);
+
+    isAudioMuted = false;
+
+    btn.innerText = '▶';
+    btn.classList.add('is-paused');
+
+    updateMuteUI();
+    updateUI(event);
+
+    return;
+  }
+
+  // Normal player operation
+  if (event.data === YT.PlayerState.PLAYING) {
+    btn.innerText = '⏸';
+    btn.classList.remove('is-paused');
+    fetchTrackTitle();
+
+  } else if (event.data === YT.PlayerState.PAUSED) {
+    btn.innerText = '▶';
+    btn.classList.add('is-paused');
+
+  } else if (event.data === YT.PlayerState.ENDED) {
+    playNextOrRandom();
+  }
+}   
 
 // Update error handler
 function onPlayerError(event) {
