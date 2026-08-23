@@ -202,6 +202,19 @@
       flex-shrink: 0;
     }
 
+    /* To make the thumbnaikl rotate  */
+    .thumb {      
+  animation: slowRotate 12s linear infinite;   
+  }
+
+  @keyframes slowRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
     .track-info {
       display: flex;
       flex-direction: column;
