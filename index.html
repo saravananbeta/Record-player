@@ -502,7 +502,7 @@ let currentIndex = 0;
 let ytPlayer;
 let isAudioMuted = true; // State tracker
 
-/* function onYouTubeIframeAPIReady() {
+ function onYouTubeIframeAPIReady() {
   ytPlayer = new YT.Player('player', {
     height: '1',
     width: '1',
@@ -529,35 +529,8 @@ let isAudioMuted = true; // State tracker
       'onError': onPlayerError
     }
   });
-}     */
+}     
 
-function onYouTubeIframeAPIReady() {
-  ytPlayer = new YT.Player('player', {
-    height: '1',
-    width: '1',
-    videoId: playlist[currentIndex],
-    playerVars: { 
-      'autoplay': 0,      // Don't start playing
-      'mute': 0,          // Start unmuted
-      'controls': 0,
-      'playsinline': 1
-    },
-    events: {
-      'onReady': function(event) {
-        event.target.unMute();
-        event.target.setVolume(100);
-        event.target.pauseVideo();  // Ensure initial state is PAUSED
-
-        event.target.loadVideoById(playlist[currentIndex]);
-
-        updateMuteUI(); 
-        updateUI(event);
-      },
-      'onStateChange': onPlayerStateChange,
-      'onError': onPlayerError
-    }
-  });
-}    
 
 // Global listener: Unmute on first click anywhere outside the mute button
 document.addEventListener('click', function unmuteOnFirstClick(e) {
