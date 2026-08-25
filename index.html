@@ -488,23 +488,26 @@
     </button>
   </div>
 
-  <!-- Sleep Timer Status Bar -->
+  <!-- Sleep Timer Bar Floating Above Player -->
   <div class="timer-bar">
-    <div id="timerDisplay" class="timer-display" style="display: none;"></div>
-    <!-- Moon Button -->
-    <button id="timerBtn" type="button" onclick="toggleTimerMenu(event)" title="Sleep Timer">🌙</button>
-  
-  <!-- Popup Selection Menu -->
-  <div id="timerMenu" class="timer-menu hidden">
-    <button type="button" onclick="setSleepTimer(15)">15 mins</button>
-    <button type="button" onclick="setSleepTimer(30)">30 mins</button>
-    <button type="button" onclick="setSleepTimer(45)">45 mins</button>
-    <button type="button" onclick="setSleepTimer(60)">60 mins</button>
-    <button type="button" onclick="setSleepTimer(0)">Turn Off</button>
-  </div>
+    <div style="position: relative;">
+      <!-- Moon Button with Text -->
+      <button id="timerBtn" type="button" onclick="toggleTimerMenu(event)" title="Sleep Timer">
+        Sleep Timer 🌙
+      </button>
 
-  <!-- Countdown Banner -->
-  <div id="timerDisplay" class="timer-display" style="display: none;"></div>
+      <!-- Popup Selection Menu -->
+      <div id="timerMenu" class="timer-menu hidden">
+        <button type="button" onclick="setSleepTimer(15)">15 mins</button>
+        <button type="button" onclick="setSleepTimer(30)">30 mins</button>
+        <button type="button" onclick="setSleepTimer(45)">45 mins</button>
+        <button type="button" onclick="setSleepTimer(60)">60 mins</button>
+        <button type="button" onclick="setSleepTimer(0)">Turn Off</button>
+      </div>
+    </div>
+
+    <!-- Countdown Banner (Clickable to open menu) -->
+    <div id="timerDisplay" class="timer-display" onclick="toggleTimerMenu(event)" style="display: none; cursor: pointer;"></div>
   </div>
 
   <!-- Minimalist Radio Player -->
@@ -590,12 +593,13 @@
       if (minutes === 0) {
         timerSeconds = 0;
         timerDisplay.style.display = 'none';
+        timerBtn.style.display = 'flex';
         timerBtn.classList.remove('is-active');
         return;
       }
 
       timerSeconds = minutes * 60;
-      timerBtn.classList.add('is-active');
+      timerBtn.style.display = 'none'; // Hide button when running
       timerDisplay.style.display = 'block';
       updateTimerDisplay();
 
@@ -607,6 +611,7 @@
             ytPlayer.pauseVideo();
           }
           timerDisplay.style.display = 'none';
+          timerBtn.style.display = 'flex'; // Show button when done
           timerBtn.classList.remove('is-active');
         } else {
           updateTimerDisplay();
