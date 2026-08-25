@@ -83,36 +83,61 @@
       gap: 8px;
     }
 
-    .timer-bar {
-    bottom: 95px; /* Prevents overlapping on smaller displays */
-    }
+   /* Container for Sleep Timer Elements Above Player */
+.timer-bar {
+  position: fixed;
+  bottom: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+}
 
-    .time-display {
-      font-size: 1rem;
-      font-weight: 500;
-      letter-spacing: 1px;
-      color: #ffffff;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
-      pointer-events: none;
-    }
+/* Style for Standalone Moon Button */
+#timerBtn {
+  background: rgba(0, 0, 0, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
 
-    .mute-btn {
-      display: none;
-      background: rgba(0, 0, 0, 0.6);
-      color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 4px;
-      padding: 4px 8px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-    }
+#timerBtn:hover,
+#timerBtn.is-active {
+  background: #ffb703 !important;
+  color: #000000 !important;
+}
 
-    .mute-btn:hover {
-      background: rgba(0, 0, 0, 0.85);
-    }
-
+/* Selection Popup Menu Positioned Above Moon Button */
+.timer-menu {
+  position: absolute;
+  bottom: 42px;
+  left: 0;
+  background: rgba(18, 18, 18, 0.95) !important;
+  border: 1px solid rgba(255, 183, 3, 0.4);
+  border-radius: 8px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 999;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+}
     .controls button {
       background: rgba(255, 255, 255, 0.1);
       border: none;
@@ -466,6 +491,20 @@
   <!-- Sleep Timer Status Bar -->
   <div class="timer-bar">
     <div id="timerDisplay" class="timer-display" style="display: none;"></div>
+    <!-- Moon Button -->
+    <button id="timerBtn" type="button" onclick="toggleTimerMenu(event)" title="Sleep Timer">🌙</button>
+  
+  <!-- Popup Selection Menu -->
+  <div id="timerMenu" class="timer-menu hidden">
+    <button type="button" onclick="setSleepTimer(15)">15 mins</button>
+    <button type="button" onclick="setSleepTimer(30)">30 mins</button>
+    <button type="button" onclick="setSleepTimer(45)">45 mins</button>
+    <button type="button" onclick="setSleepTimer(60)">60 mins</button>
+    <button type="button" onclick="setSleepTimer(0)">Turn Off</button>
+  </div>
+
+  <!-- Countdown Banner -->
+  <div id="timerDisplay" class="timer-display" style="display: none;"></div>
   </div>
 
   <!-- Minimalist Radio Player -->
@@ -490,17 +529,6 @@
     </div>
 
     <div class="controls">
-      <!-- Popup Menu -->
-      <div id="timerMenu" class="timer-menu hidden">
-        <button type="button" onclick="setSleepTimer(1)">1 mins</button>
-        <button type="button" onclick="setSleepTimer(30)">30 mins</button>
-        <button type="button" onclick="setSleepTimer(45)">45 mins</button>
-        <button type="button" onclick="setSleepTimer(60)">60 mins</button>
-        <button type="button" onclick="setSleepTimer(0)">Turn Off</button>
-      </div>
-      
-      <!-- Moon Button -->
-      <button id="timerBtn" type="button" onclick="toggleTimerMenu(event)" title="Sleep Timer">🌙</button>
       <button id="shuffleBtn" type="button" onclick="toggleShuffle()" title="Shuffle">&#x1F500;&#xFE0E;</button>  
       <button id="playBtn" type="button" onclick="togglePlay()" title="Play/Pause">▶</button>
       <button type="button" onclick="nextTrack(event)" title="Next">▶▶</button>
