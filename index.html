@@ -786,7 +786,7 @@ function shufflePlaylist(array) {
       renderTrackChange();
     }
 
-      function renderTrackChange() {
+    /*  function renderTrackChange() {
       const activeList = getActivePlaylist();
       const currentNum = currentIndex + 1;
       const trackElem = document.getElementById('trackInput') 
@@ -805,13 +805,34 @@ function shufflePlaylist(array) {
         ytPlayer.loadVideoById(activeList[currentIndex]);
 
         if (!isPlaying) {
-      ytPlayer.pauseVideo();
       let shouldPauseAfterLoad = true;
       }  //Keep player paused if it is already in PAUSED state. 
         updateUI();
       }
     } 
+  */
+  function renderTrackChange() {
+  const activeList = getActivePlaylist();
 
+  if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+    // 1. Check if video is currently playing before switching
+    const isPlaying = (ytPlayer.getPlayerState && ytPlayer.getPlayerState() === YT.PlayerState.PLAYING);
+
+    // 2. Load the next track
+    ytPlayer.loadVideoById(activeList[currentIndex]);
+
+    // 3. If it was paused, pause it right after loadVideoById initializes
+    if (!isPlaying) {
+      setTimeout(() => {
+        if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+          ytPlayer.pauseVideo();
+        }
+      }, 50);
+    }
+
+    updateUI();
+  }
+}
    
     function jumpToTrack(val) {
       let requestedNum = parseInt(val, 10);
