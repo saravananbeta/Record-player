@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Record player</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      color: #fff;
+    }
+
+    body {
+      background-color: #000;
+      font-family: sans-serif;
+    }
+
+    /* Fullscreen Background Image */
+    .bg-image {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover !important;
+      object-position: top center;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Cursive Title at Top Left */
+    .app-header {
+      position: fixed;
+      top: 25px;
+      left: 35px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .app-header h1 {
+      font-family: 'Great Vibes', 'Brush Script MT', cursive;
+      font-size: 3.4rem;
+      font-weight: 400;
+      color: #ffffff;   
+      text-shadow: 0 3px 12px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.8);
+      line-height: 1;
+    }
+
+    /* Top Right Container for Clock & Mute Button */
+    .top-right-container {
+      position: fixed;
+      top: 25px;
+      right: 35px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .time-display {
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+      pointer-events: none;
+    }
+
+       /* Mute Button (Transparent Background) */
+      .mute-btn {
+      /* display: block !important;  */
+      display: none;
+      background: transparent !important;
+      color: #ffffff;
+      border: none !important;
+      outline: none !important;
+      padding: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+    .mute-btn:hover,
+    .mute-btn:focus,
+    .mute-btn:active {
+      background: transparent !important;
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Container for Sleep Timer Elements Above Player */
+    .timer-bar {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 120;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    /* Standalone Sleep Timer Pill Button */
+    #timerBtn {
+      background: rgba(0, 0, 0, 0.75) !important;
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
+      color: #ffffff !important;
+      width: auto !important;
+      height: 32px !important;
+      min-width: unset !important;
+      padding: 0 14px !important;
+      border-radius: 20px !important;
+      cursor: pointer;
+      font-size: 0.8rem !important;
+      font-weight: 500;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 6px !important;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      white-space: nowrap !important;
+      line-height: normal !important;
+    }
+
+    #timerBtn:hover,
+    #timerBtn.is-active {
+      background: #ffb703 !important;
+      color: #000000 !important;
+    }
+
+    #timerBtn.is-running {
+      border-color: rgba(255, 183, 3, 0.4) !important;
+    }
+
+    #timerBtn.is-running #timerLabel {
+      color: #ffb703 !important;
+      font-weight: 600;
+    }
+
+    #timerBtn.is-running:hover #timerLabel {
+      color: #000000 !important;
+    }
+
+    /* Selection Popup Menu Positioned Above Timer Bar */
+    .timer-menu {
+      position: absolute;
+      bottom: 100%;
+      margin-bottom: 2px; /* Optional spacing gap between button and menu */
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(18, 18, 18, 0.95) !important;
+      border: 1px solid rgba(255, 183, 3, 0.4);
+      border-radius: 8px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 999;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+    }
+
+    .timer-menu.hidden {
+      display: none !important;
+    }
+
+    .timer-menu button {
+      background: rgba(255, 255, 255, 0.08) !important;
+      border: none;
+      color: #ffffff !important;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      text-align: center;
+      width: 100% !important;
+      height: auto !important;
+    }
+
+    .timer-menu button:hover {
+      background: #ffb703 !important;
+      color: #000000 !important;
+    }
+
+    .controls button {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #ffffff;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease;
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      outline: none !important;
+    }
+
+    .controls button:focus,
+    .controls button:active,
+    .controls button:hover {
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: #ffffff !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .controls button:hover {
+        background: #ffb703 !important;
+        color: #000000 !important;
+      }
+    }
+
+    .controls button.is-pressed,
+    .controls button.is-active {
+      background: #ffb703 !important;
+      color: #000000 !important;
+    }   
+
+    /* Base Player Bar */
+    .player-bar {
+      position: fixed;
+      bottom: 35px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 28px;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      transform-origin: bottom center;
+    }
+
+    .track-info {
+      max-width: 220px;
+      font-size: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .volume-container input[type="range"] {
+      width: 80px;
+      accent-color: #ffb703;
+      cursor: pointer;
+    }
+
+    .thumb {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid #ffb703;
+      flex-shrink: 0;
+      animation: slowRotate 8s linear infinite;
+      animation-play-state: paused;
+    }
+
+    .thumb.is-playing {
+      animation-play-state: running;
+    }   
+
+    @keyframes slowRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .track-title {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+    }
+
+    .track-sub {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.68rem;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-top: 2px;
+      display: inline-block; /* Keeps them inline while allowing margin/padding adjustments */
+    }
+
+    .track-input {
+      width: 32px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 4px;
+      color: #ffb703;
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-align: center;
+      outline: none;
+      padding: 0 2px;
+      transition: all 0.2s ease;
+    }
+
+    .track-input:focus {
+      border-color: #ffb703;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .track-input::-webkit-outer-spin-button,
+    .track-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .track-input[type=number] {
+      -moz-appearance: textfield;
+    }
+ 
+    .controls {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .volume-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      margin-left: 2px;
+      flex-shrink: 0;
+    }
+
+    #playBtn:not(.is-paused) {
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: #ffffff !important;
+    }
+
+    #playBtn.is-paused {
+      background: #ffb703 !important;
+      color: #000000 !important;
+    }
+
+    .yt-link-text {
+      position: fixed;
+      bottom: 25px;
+      right: 35px;
+      z-index: 100;
+      color: #ffb703;
+      text-decoration: underline;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+      transition: color 0.2s ease;
+    }
+
+    .yt-link-text:hover {
+      color: #ffffff;
+    }
+
+    .audio-engine {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 1px;
+      height: 1px;
+      opacity: 0.01;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @media (max-width: 600px) {
+      .bg-image {
+        object-fit: cover !important;
+        object-position: center center !important;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .app-header {
+        top: 15px;
+        left: 20px;
+      }
+
+      .app-header h1 {
+        font-size: 2.2rem;
+      }
+
+      .top-right-container {
+        top: 60px;
+        right: 20px;
+      }
+
+      .time-display {
+        font-size: 0.85rem;
+      }
+
+      .listener-count {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #ffffff;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+        pointer-events: none;
+      }
+    
+      .player-bar {
+        bottom: 45px;
+        gap: 8px;
+        padding: 6px 12px;
+        max-width: 95vw;
+      }
+
+      .timer-bar {
+        bottom: 95px;
+      }
+
+      .track-info {
+        max-width: 100px;
+      }
+
+      .volume-container input[type="range"] {
+        width: 45px;
+      }
+
+      .yt-link-text {
+        bottom: 12px;
+        right: 50%;
+        transform: translateX(50%);
+        font-size: 0.75rem;
+        white-space: nowrap;
+      }
+    }  
+  </style>
+</head>
+<body>
+ 
+  <picture>
+    <source media="(max-width: 600px)" srcset="Record_player_mobile_bg_sepia.jpg" />
+    <img src="Record_player_bg.jpg" alt="Background" class="bg-image" />
+  </picture>
+
+  <header class="app-header">
+    <h1>Record Player Days</h1>
+  </header>
+
+  <div class="top-right-container">
+    <div id="clockDisplay" class="time-display">00:00</div>
+    <div id="listenerCount" class="listener-count">Online: --</div>
+    <button id="muteBtn" class="mute-btn" aria-label="Toggle Sound">
+      <span id="muteIcon">🔇</span>
+    </button>
+  </div>
+
+  <!-- Sleep Timer Bar Floating Above Player -->
+  <div class="timer-bar">
+    <div style="position: relative;">
+      <!-- Moon Button with Text -->
+      <button id="timerBtn" type="button" onclick="toggleTimerMenu(event)" title="Sleep Timer">
+        <span id="timerLabel">Sleep Timer 🌙</span>
+      </button>
+
+      <!-- Popup Selection Menu -->
+      <div id="timerMenu" class="timer-menu hidden">
+        <button type="button" onclick="setSleepTimer(30)">30 mins</button>
+        <button type="button" onclick="setSleepTimer(45)">45 mins</button>
+        <button type="button" onclick="setSleepTimer(60)">60 mins</button>
+        <button type="button" onclick="setSleepTimer(0)">Turn Off</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Minimalist Radio Player -->
+  <div class="player-bar">
+    <img id="trackThumb" src="" alt="Thumb" class="thumb" />
+  
+
+  <div class="track-info">
+      <span id="trackTitle" class="track-title" title="Track Title">Loading Title...</span>
+      <div> 
+      <span id="trackNumber" class="track-sub"></span>
+      <span id="trackTotal" class="track-sub"></span>
+      </div>
+    </div>
+
+    <div class="controls">      
+      <!-- <button type="button" onclick="prevTrack(event)" title="Previous">◀◀</button>  -->
+      <button id="shuffleBtn" onclick="toggleShuffle()" title="Shuffle">&#x1F500;&#xFE0E;</button>
+      <button id="playBtn" type="button" onclick="togglePlay()" title="Play/Pause">▶</button>
+      <button type="button" onclick="nextTrack(event)" title="Next">▶▶</button>
+    </div>
+
+    <div class="volume-container">
+      <span>🔊</span>
+      <input type="range" id="volumeSlider" min="0" max="100" value="80" oninput="setVolume(this.value)" />
+    </div>
+  </div>
+
+  <a href="https://music.youtube.com/playlist?list=PLKSjwCo_iCIQ" target="_blank" class="yt-link-text" rel="noopener noreferrer">YouTube Music Playlist</a>
+
+  <div id="player" class="audio-engine"></div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('clockDisplay').innerText = `${hours}:${minutes}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    const originalPlaylist = [
+      "ovFi6AcOw-c", "ZMXB5MKiabw", "-nrnGjxOLA0", "pOU-abdx0b4", "cBkPFtb1sMQ", "4Ts2ZuaPRkk", "-Bi1iST7EWE", "9vDKA33y4oo",
+      "g9cLHP1RE4k", "PkWkcpsGYRQ", "HZdZLdE5KBA", "a-ATN4ZhMos", "nBvIsNfFSZM", "uoJc1hBOUH4", "HpMshzNxdoA", "Jn2IUAHfjOo",
+      "D3kWLpgkeDM", "W2M7CF7sRrU", "X1ojBdibGv4", "0H4Ai65Vvck", "k2updOWY6Dk", "_n9TkjMAQm4", "D-_VfDf2NTk", "Qs3B_1fyGJM",
+      "CzBolio3q8k", "vCnGatVR25A", "Lwstbkko8ko", "7BiawO9Lba8", "O3JWTBTbw3w", "aDpj9aU5rJs", "lGJqrHBkKsw", "AZXIWu7kjUE",
+      "eQG8n0oGYg0", "Z-jnWdjcFbU", "EsTkKsxGL4o", "bliK9cv1-x0", "q3Wm0Y4sV2o", "p4Vn4u-A43w", "JzqGvLA72ac", "DNmVHa3VdNQ",
+      "aOK112Wu2UQ", "rmW-5Se0Rvo", "GVxroWnBMQ0", "s4TdHTtuVQ8", "m7HkVlOyoiU", "KDDAilTlXP4", "z_xNn0YKFpQ", "cVPns9GjtU8",
+      "YsKCM8xYBPQ", "yPlsftoiaE0", "R3EqbeOeZEg", "WY71us627uA", "8eKCa8KDHAU", "N0VRo8cjDeg", "iZnzI4BWY4c", "KCRU7d2im8g"
+    ];
+
+    /**
+ * Fisher-Yates Shuffle algorithm.
+ * Mutates the original array in-place, making the changes instantly visible
+ * to any other function accessing `playlist`.
+ */
+function shufflePlaylist(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    // Pick a random index from 0 to i
+    const j = Math.floor(Math.random() * (i + 1));
+    // Swap elements array[i] and array[j]
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+// Perform the shuffle
+// Separate copies so shuffling doesn't mutate original
+    const shuffledList = [...originalPlaylist];
+    shufflePlaylist(shuffledList);
+
+
+    let isShuffleOn = false;    
+    let currentIndex = 0;    
+    let ytPlayer;
+    let isAudioMuted = true;
+
+    /* Sleep Timer Functions */
+    let timerInterval = null;
+    let timerSeconds = 0;
+
+    function toggleTimerMenu(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById('timerMenu');
+      menu.classList.toggle('hidden');
+    }
+
+    function setSleepTimer(minutes) {
+      document.getElementById('timerMenu').classList.add('hidden');
+      if (timerInterval) clearInterval(timerInterval);
+
+      const timerBtn = document.getElementById('timerBtn');
+      const timerLabel = document.getElementById('timerLabel');
+
+      if (minutes === 0) {
+        timerSeconds = 0;
+        timerLabel.innerText = 'Sleep Timer 🌙';
+        timerBtn.classList.remove('is-running');
+        return;
+      }
+
+      timerSeconds = minutes * 60;
+      timerBtn.classList.add('is-running');
+      updateTimerDisplay();
+
+      timerInterval = setInterval(() => {
+        timerSeconds--;
+        if (timerSeconds <= 0) {
+          clearInterval(timerInterval);
+          if (ytPlayer && ytPlayer.pauseVideo) {
+            ytPlayer.pauseVideo();
+          }
+          timerLabel.innerText = 'Sleep Timer 🌙';
+          timerBtn.classList.remove('is-running');
+        } else {
+          updateTimerDisplay();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(timerSeconds / 60);
+      const secs = timerSeconds % 60;
+      document.getElementById('timerLabel').innerText = 
+        `Timer: ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('timerMenu');
+      const btn = document.getElementById('timerBtn');
+      if (menu && !menu.contains(e.target) && (!btn || !btn.contains(e.target))) {
+        menu.classList.add('hidden');
+      }
+    });
+
+   function getActivePlaylist() {
+      return isShuffleOn ? shuffledList : originalPlaylist;
+    }
+
+    function onYouTubeIframeAPIReady() {
+      const activeList = getActivePlaylist();
+      ytPlayer = new YT.Player('player', {
+        height: '1',
+        width: '1',
+        videoId: activeList[currentIndex],
+        playerVars: { 
+          'autoplay': 1,
+          'mute': 1,
+          'controls': 0,
+          'playsinline': 1
+        },
+        events: {
+          'onReady': function(event) {
+            event.target.mute();
+            event.target.setVolume(90);
+            updateMuteUI();
+            updateUI(event);
+          },
+          'onStateChange': onPlayerStateChange,
+          'onError': onPlayerError
+        }
+      });
+    }    
+
+    document.addEventListener('click', function unmuteOnFirstClick(e) {
+      if (e.target.closest('#muteBtn') || e.target.closest('#timerBtn') || e.target.closest('#timerMenu')) return;
+
+      if (isAudioMuted) {
+        isAudioMuted = false;
+        if (ytPlayer && typeof ytPlayer.unMute === 'function') {
+          ytPlayer.unMute();
+          ytPlayer.setVolume(100);
+        }
+        updateMuteUI();
+      }
+    }, { once: true });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const muteBtn = document.getElementById('muteBtn');
+      if (muteBtn) {
+        muteBtn.addEventListener('click', function() {
+          isAudioMuted = !isAudioMuted;
+
+          if (ytPlayer && typeof ytPlayer.unMute === 'function') {
+            if (isAudioMuted) {
+              ytPlayer.mute();
+            } else {
+              ytPlayer.unMute();
+              ytPlayer.setVolume(100);
+            }
+          }
+          updateMuteUI();
+        });
+      }
+    });
+
+    function updateMuteUI() {
+      const muteIcon = document.getElementById('muteIcon');
+      const muteBtn = document.getElementById('muteBtn');
+      if (!muteIcon) return;
+
+      if (isAudioMuted) {
+        muteIcon.textContent = '🔇';
+        if (muteBtn) muteBtn.classList.add('is-muted');
+      } else {
+        muteIcon.textContent = '🔊';
+        if (muteBtn) muteBtn.classList.remove('is-muted');
+      }
+    }
+
+    if (window.YT && window.YT.Player) {
+      onYouTubeIframeAPIReady();
+    }
+    
+    function updateUI() {
+      const activeList = getActivePlaylist();
+      const id = activeList[currentIndex];
+      document.getElementById('trackThumb').src = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+      document.getElementById('trackInput').value = currentIndex + 1;
+      fetchTrackTitle();
+    }
+
+    function fetchTrackTitle() {
+      if (ytPlayer && ytPlayer.getVideoData) {
+        const title = ytPlayer.getVideoData().title;
+        if (title) {
+          document.getElementById('trackTitle').innerText = title;
+          document.getElementById('trackTitle').title = title;
+          return;
+        }
+      }
+      document.getElementById('trackTitle').innerText = `Track ${currentIndex + 1}`;
+    }
+
+    function togglePlay() {
+      if (!ytPlayer) return;
+      const state = ytPlayer.getPlayerState();
+      if (state === YT.PlayerState.PLAYING) {
+        ytPlayer.pauseVideo();
+      } else {
+        ytPlayer.playVideo();
+      }
+    }
+
+    function toggleShuffle() {
+      isShuffleOn = !isShuffleOn;
+      const btn = document.getElementById('shuffleBtn');
+      if (btn) {
+        btn.classList.toggle('is-active', isShuffleOn);
+       btn.blur(); // Prevents sticky browser focus styling
+      }
+      getNumbers();
+    }
+
+
+    function flashButton(btn) {
+      if (!btn || !(btn instanceof HTMLElement)) return;
+      if (btn._timer) clearTimeout(btn._timer);
+      btn.classList.add('is-pressed');
+      btn._timer = setTimeout(function() {
+        btn.classList.remove('is-pressed');
+        btn.blur();
+        if (document.activeElement) {
+          document.activeElement.blur();
+        }
+      }, 1000);
+    }
+
+    function nextTrack(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const btn = e ? (e.currentTarget || e.target) : null;
+      flashButton(btn);
+
+      const activeList = getActivePlaylist();
+      currentIndex = (currentIndex + 1) % activeList.length;
+      renderTrackChange();
+    }
+
+    function prevTrack(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const btn = e ? (e.currentTarget || e.target) : null;
+      flashButton(btn);
+      
+      const activeList = getActivePlaylist();
+      currentIndex = (currentIndex + 1) % activeList.length;
+      renderTrackChange();
+    }
+
+    function renderTrackChange() {
+      const activeList = getActivePlaylist();
+      const currentNum = currentIndex + 1;
+      const trackElem = document.getElementById('trackInput') 
+                     || document.querySelector('.trackInput') 
+                     || document.querySelector('[name="trackInput"]');
+
+      if (trackElem) {
+        if ('value' in trackElem) {
+          trackElem.value = currentNum;
+          trackElem.setAttribute('value', currentNum);
+        }
+        trackElem.textContent = currentNum;
+      }
+
+      if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+        ytPlayer.loadVideoById(activeList[currentIndex]);
+        updateUI();
+      }
+    }
+
+    function jumpToTrack(val) {
+      let requestedNum = parseInt(val, 10);
+      if (!isNaN(requestedNum) && requestedNum >= 1 && requestedNum <= playlist.length) {
+        currentIndex = requestedNum - 1;
+        renderTrackChange();
+      } else {
+        const trackElem = document.getElementById('trackInput');
+        if (trackElem) {
+          trackElem.value = currentIndex + 1;
+        }
+      }
+    }
+
+    function setVolume(val) {
+      if (ytPlayer && ytPlayer.setVolume) {
+        ytPlayer.setVolume(val);
+      }
+    }
+
+    function playNextOrRandom() {
+      if (isShuffleOn) {
+        let randomIndex = Math.floor(Math.random() * playlist.length);
+        if (playlist.length > 1 && randomIndex === currentIndex) {
+          randomIndex = (randomIndex + 1) % playlist.length;
+        }
+        currentIndex = randomIndex;
+        renderTrackChange();
+      } else {
+        currentIndex = (currentIndex + 1) % playlist.length;
+        renderTrackChange();
+      }
+    }
+
+    let initialLoad = true;
+
+    function onPlayerStateChange(event) {
+      const btn = document.getElementById('playBtn');
+
+      if (initialLoad && event.data === YT.PlayerState.PLAYING) {
+        initialLoad = false;
+        event.target.pauseVideo();
+        event.target.unMute();
+        event.target.setVolume(100);
+
+        isAudioMuted = false;
+        btn.innerText = '▶';
+        btn.classList.add('is-paused');
+
+        updateMuteUI();
+        updateUI(event);
+        return;
+      }
+
+      if (event.data === YT.PlayerState.PLAYING) {
+        btn.innerText = '⏸';
+        btn.classList.remove('is-paused');
+        document.getElementById('trackThumb').classList.add('is-playing');
+        fetchTrackTitle();
+      } else if (event.data === YT.PlayerState.PAUSED) {
+        btn.innerText = '▶';
+        btn.classList.add('is-paused');
+        document.getElementById('trackThumb').classList.remove('is-playing');
+      } else if (event.data === YT.PlayerState.ENDED) {
+        document.getElementById('trackThumb').classList.remove('is-playing');
+        playNextOrRandom();
+      }
+      getNumbers();
+    }   
+
+    function onPlayerError(event) {
+      console.warn(`Track ${currentIndex + 1} is unplayable. Skipping...`);
+      playNextOrRandom();
+    }
+        
+    let currentCount = Math.floor(Math.random() * (25 - 10 + 1)) + 10;
+
+    function updateFakeListeners() {
+      const countElem = document.getElementById('listenerCount');
+      if (countElem) {
+        countElem.innerText = `Online: ${currentCount}`;
+        const delta = Math.floor(Math.random() * 5) - 2;
+        currentCount = Math.max(5, currentCount + delta);
+      }
+    }
+
+    updateFakeListeners();
+    setInterval(updateFakeListeners, 15000);
+
+    function getNumbers(){
+document.getElementById('trackNumber').innerText = `${currentIndex + 1} / `; 
+if (isShuffleOn){ 
+document.getElementById('trackTotal').innerText = `${originalPlaylist.length} \u{1F500}`; 
+}
+else{
+document.getElementById('trackTotal').innerText = `${originalPlaylist.length} \u{27A1}`; 
+}
+}
+  </script>
+</body>
+</html>
+
+***********
+<div class="track-sub">
+        <input 
+          type="number" 
+          id="trackInput" 
+          class="track-input" 
+          min="1" 
+          max="56" 
+          value="1" 
+          onchange="jumpToTrack(this.value)"
+          onkeydown="if(event.key==='Enter') this.blur()"
+        />
+        <span>/56</span>
+      </div>
+
+<button id="shuffleBtn" type="button" onclick="toggleShuffle()" title="Shuffle">&#x1F500;&#xFE0E;</button> 
