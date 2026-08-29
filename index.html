@@ -819,7 +819,7 @@ function shufflePlaylist(array) {
       }
     } 
   */
-  function renderTrackChange() {
+  /* function renderTrackChange() {
   const activeList = getActivePlaylist();
 
   if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
@@ -845,6 +845,21 @@ function shufflePlaylist(array) {
         }
       }, 50);
     }
+    updateUI();
+  }
+}  */
+
+    function renderTrackChange() {
+  const activeList = getActivePlaylist();
+
+  if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+    // Check if player is paused OR if a pause is already queued from a previous rapid click
+    const state = ytPlayer.getPlayerState ? ytPlayer.getPlayerState() : null;
+    if (state === YT.PlayerState.PAUSED || shouldPauseAfterLoad) {
+      shouldPauseAfterLoad = true;
+    }
+
+    ytPlayer.loadVideoById(activeList[currentIndex]);
     updateUI();
   }
 }
@@ -875,7 +890,7 @@ function shufflePlaylist(array) {
 
     let initialLoad = true;
 
-    function onPlayerStateChange(event) {
+    /* function onPlayerStateChange(event) {
       const btn = document.getElementById('playBtn');
 
       if (initialLoad && event.data === YT.PlayerState.PLAYING) {
@@ -916,7 +931,49 @@ function shufflePlaylist(array) {
         playNextOrRandom();
       }
       getNumbers();
-    }   
+    }   */
+
+    function onPlayerStateChange(event) {
+  const btn = document.getElementById('playBtn');
+
+  if (initialLoad && event.data === YT.PlayerState.PLAYING) {
+    initialLoad = false;
+    event.target.pauseVideo();
+    event.target.unMute();
+    event.target.setVolume(100);
+    isAudioMuted = false;
+    btn.innerText = '▶';
+    btn.classList.add('is-paused');
+    updateMuteUI();
+    updateUI();
+    return;
+  }
+
+  // Intercept playing event if a pause was requested after changing tracks
+  if (shouldPauseAfterLoad && event.data === YT.PlayerState.PLAYING) {
+    shouldPauseAfterLoad = false;
+    event.target.pauseVideo();
+    btn.innerText = '▶';
+    btn.classList.add('is-paused');
+    document.getElementById('trackThumb').classList.remove('is-playing');
+    return;
+  }
+
+  if (event.data === YT.PlayerState.PLAYING) {
+    btn.innerText = '⏸';
+    btn.classList.remove('is-paused');
+    document.getElementById('trackThumb').classList.add('is-playing');
+    fetchTrackTitle();
+  } else if (event.data === YT.PlayerState.PAUSED) {
+    btn.innerText = '▶';
+    btn.classList.add('is-paused');
+    document.getElementById('trackThumb').classList.remove('is-playing');
+  } else if (event.data === YT.PlayerState.ENDED) {
+    playNextOrRandom();
+    document.getElementById('trackThumb').classList.remove('is-playing');
+  }
+  getNumbers();
+}
 
     function onPlayerError(event) {
       console.warn(`Track ${currentIndex + 1} is unplayable. Skipping...`);
