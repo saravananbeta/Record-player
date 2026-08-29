@@ -855,6 +855,8 @@ function shufflePlaylist(array) {
 
         updateMuteUI();
         updateUI(event);
+        return;
+     }
 
         if (shouldPauseAfterLoad && event.data === YT.PlayerState.PLAYING) {
        shouldPauseAfterLoad = false;
