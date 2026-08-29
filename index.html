@@ -268,7 +268,9 @@
     }
 
     .track-info {
+      width: 220px; 
       max-width: 220px;
+      min-width: 220px; 
       font-size: 1rem;
       display: flex;
       flex-direction: column;
@@ -303,15 +305,16 @@
     }
 
     .track-title {
-      font-size: 0.72rem;
-      font-weight: 500;
-      color: #ffffff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      line-height: 1.2;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;        /* Ensures proper block text-overflow handling */
+    width: 100%;
+    line-height: 1.2;
     }
-
     .track-sub {
       color: rgba(255, 255, 255, 0.5);
       font-size: 0.68rem;
@@ -472,11 +475,12 @@
       .timer-bar {
         bottom: 95px;
       }
-
+      
       .track-info {
-        max-width: 100px;
-      }
-
+       width: 100px;
+       max-width: 100px;
+       min-width: 100px;
+       }
       .volume-container input[type="range"] {
         width: 45px;
       }
