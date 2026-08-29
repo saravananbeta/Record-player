@@ -360,21 +360,24 @@
       flex-shrink: 0;
     }
 
-    #playBtn:not(.is-paused) {
-      background: rgba(255, 255, 255, 0.1) !important;
-      color: #ffffff !important;
-    }
-  
-  #playBtn:not(.is-paused):hover {  
+    /* 1) Playing State (|| appearing): White text on semi-transparent background */
+  #playBtn:not(.is-paused) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+/* 2) Playing & Hovering: Black text on yellow background */
+  #playBtn:not(.is-paused):hover {
   background: #ffb703 !important;
-  color: #000000 !important;  /* To give yellow highlight when hovering */
-  }
+  color: #000000 !important;
+}
 
-    #playBtn.is-paused {
-      background: #ffb703 !important;
-      color: #000000 !important;
-    }
-
+/* 3) Paused State (> appearing): Black text on yellow background (default & hover) */
+ #playBtn.is-paused,
+ #playBtn.is-paused:hover {
+  background: #ffb703 !important;
+  color: #000000 !important;
+}
     .yt-link-text {
       position: fixed;
       bottom: 25px;
