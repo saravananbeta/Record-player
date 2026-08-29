@@ -985,7 +985,6 @@ function shufflePlaylist(array) {
     btn.innerText = '⏸';
     btn.classList.remove('is-paused');
     document.getElementById('trackThumb').classList.add('is-playing');
-    fetchTrackTitle();
   } else if (event.data === YT.PlayerState.PAUSED) {
     btn.innerText = '▶';
     btn.classList.add('is-paused');
