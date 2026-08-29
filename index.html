@@ -715,9 +715,9 @@ function shufflePlaylist(array) {
       const activeList = getActivePlaylist();
       const id = activeList[currentIndex];
       document.getElementById('trackThumb').src = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
-      document.getElementById('trackInput').value = currentIndex + 1;
+      // document.getElementById('trackInput').value = currentIndex + 1;  // Since input box is removed.
       fetchTrackTitle();
-    }
+    }  
 
     function fetchTrackTitle() {
       if (ytPlayer && ytPlayer.getVideoData) {
@@ -785,7 +785,7 @@ function shufflePlaylist(array) {
       renderTrackChange();
     }
 
-    function renderTrackChange() {
+      function renderTrackChange() {
       const activeList = getActivePlaylist();
       const currentNum = currentIndex + 1;
       const trackElem = document.getElementById('trackInput') 
@@ -802,10 +802,15 @@ function shufflePlaylist(array) {
 
       if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
         ytPlayer.loadVideoById(activeList[currentIndex]);
+
+        if (!isPlaying) {
+      ytPlayer.pauseVideo();
+      }  //Keep player paused if it is already in PAUSED state. 
         updateUI();
       }
-    }
+    } 
 
+   
     function jumpToTrack(val) {
       let requestedNum = parseInt(val, 10);
       if (!isNaN(requestedNum) && requestedNum >= 1 && requestedNum <= playlist.length) {
