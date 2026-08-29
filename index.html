@@ -728,7 +728,7 @@ function shufflePlaylist(array) {
       fetchTrackTitle();
     }  
 
-    function fetchTrackTitle() {
+    /* function fetchTrackTitle() {
       if (ytPlayer && ytPlayer.getVideoData) {
         const title = ytPlayer.getVideoData().title;
         if (title) {
@@ -738,7 +738,29 @@ function shufflePlaylist(array) {
         }
       }
       document.getElementById('trackTitle').innerText = `Track ${currentIndex + 1}`;
-    }
+    } */
+
+    function fetchTrackTitle() {
+  const activeList = getActivePlaylist();
+  const videoId = activeList[currentIndex];
+
+  // Instantly set fallback text while fetching
+  document.getElementById('trackTitle').innerText = `Loading Track ${currentIndex + 1}...`;
+
+  fetch(`https://noembed.com/embed?dataType=json&url=https://www.youtube.com/watch?v=${videoId}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.title) {
+        document.getElementById('trackTitle').innerText = data.title;
+        document.getElementById('trackTitle').title = data.title;
+      } else {
+        document.getElementById('trackTitle').innerText = `Track ${currentIndex + 1}`;
+      }
+    })
+    .catch(() => {
+      document.getElementById('trackTitle').innerText = `Track ${currentIndex + 1}`;
+    });
+}
 
     function togglePlay() {
       if (!ytPlayer) return;
