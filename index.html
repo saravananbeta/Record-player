@@ -573,6 +573,7 @@ function shufflePlaylist(array) {
     let currentIndex = 0;    
     let ytPlayer;
     let isAudioMuted = true;
+    let shouldPauseAfterLoad = false; //This flag is used to pause video when >> pressed, if it is already in pause state.
 
     /* Sleep Timer Functions */
     let timerInterval = null;
@@ -805,6 +806,7 @@ function shufflePlaylist(array) {
 
         if (!isPlaying) {
       ytPlayer.pauseVideo();
+      let shouldPauseAfterLoad = true;
       }  //Keep player paused if it is already in PAUSED state. 
         updateUI();
       }
@@ -834,9 +836,6 @@ function shufflePlaylist(array) {
       const activeList = getActivePlaylist();
       currentIndex = (currentIndex + 1) % activeList.length;
       renderTrackChange();
-      if (!isPlaying) {
-      ytPlayer.pauseVideo();
-    }
     }
 
     let initialLoad = true;
@@ -856,7 +855,14 @@ function shufflePlaylist(array) {
 
         updateMuteUI();
         updateUI(event);
-        return;
+
+        if (shouldPauseAfterLoad && event.data === YT.PlayerState.PLAYING) {
+       shouldPauseAfterLoad = false;
+       event.target.pauseVideo();
+       btn.innerText = '▶';
+       btn.classList.add('is-paused');
+       document.getElementById('trackThumb').classList.remove('is-playing');
+       return;
       }
 
       if (event.data === YT.PlayerState.PLAYING) {
