@@ -227,12 +227,19 @@
       box-shadow: none !important;
     }
 
-    @media (hover: hover) and (pointer: fine) {
-      .controls button:hover {
-        background: #ffb703 !important;
-        color: #000000 !important;
-      }
-    }
+    /* Standard control buttons hover (desktop only) */
+  @media (hover: hover) and (pointer: fine) {
+  .controls button:hover {
+    background: #ffb703 !important;
+    color: #000000 !important;
+  }
+  
+  /* 2) Playing & Hovering (desktop only): Black text on yellow background */
+  #playBtn:not(.is-paused):hover {
+    background: #ffb703 !important;
+    color: #000000 !important;
+  }
+}
 
     .controls button.is-pressed,
     .controls button.is-active {
@@ -360,24 +367,39 @@
       flex-shrink: 0;
     }
 
-    /* 1) Playing State (|| appearing): White text on semi-transparent background */
-  #playBtn:not(.is-paused) {
+   /* 1) Playing State (|| appearing): White text on semi-transparent background (Default, Focus, Active, Hover on Mobile) */
+#playBtn:not(.is-paused),
+#playBtn:not(.is-paused):focus,
+#playBtn:not(.is-paused):focus-visible,
+#playBtn:not(.is-paused):active {
   background: rgba(255, 255, 255, 0.1) !important;
   color: #ffffff !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
 
-/* 2) Playing & Hovering: Black text on yellow background */
+/* 2) Playing State (Desktop Hover Only): Black text on yellow background */
+@media (hover: hover) and (pointer: fine) {
   #playBtn:not(.is-paused):hover {
-  background: #ffb703 !important;
-  color: #000000 !important;
+    background: #ffb703 !important;
+    color: #000000 !important;
+  }
 }
 
-/* 3) Paused State (> appearing): Black text on yellow background (default & hover) */
- #playBtn.is-paused,
- #playBtn.is-paused:hover {
+/* 3) Paused State (> appearing): Black text on yellow background across all states */
+#playBtn.is-paused,
+#playBtn.is-paused:hover,
+#playBtn.is-paused:focus,
+#playBtn.is-paused:focus-visible,
+#playBtn.is-paused:active {
   background: #ffb703 !important;
   color: #000000 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
+    
     .yt-link-text {
       position: fixed;
       bottom: 25px;
