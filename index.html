@@ -823,22 +823,21 @@ function shufflePlaylist(array) {
   const activeList = getActivePlaylist();
 
   if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-    const isPlaying = (ytPlayer.getPlayerState && ytPlayer.getPlayerState() === YT.PlayerState.PLAYING);
+    // Only check if it was explicitly PAUSED by the user before changing tracks
+    const wasPaused = (ytPlayer.getPlayerState && ytPlayer.getPlayerState() === YT.PlayerState.PAUSED);
 
     ytPlayer.loadVideoById(activeList[currentIndex]);
 
-    if (!isPlaying) {
+    if (wasPaused) {
       setTimeout(() => {
         if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
           ytPlayer.pauseVideo();
           
-          // Ensure play/pause button state and hover styles match paused state
           const btn = document.getElementById('playBtn');
           if (btn) {
             btn.innerText = '▶';
             btn.classList.add('is-paused');
           }
-          // Pause thumbnail spinning animation
           const thumb = document.getElementById('trackThumb');
           if (thumb) {
             thumb.classList.remove('is-playing');
