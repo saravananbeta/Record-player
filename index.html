@@ -465,21 +465,28 @@
         pointer-events: none;
       }
     
-      .player-bar {
+      /*.player-bar {
         bottom: 45px;
         gap: 8px;
         padding: 6px 12px;
         max-width: 95vw;
+      } */
+      .player-bar {
+      bottom: 45px;
+      gap: 8px;
+      padding: 6px 12px;
+      width: 92vw;          /* Constrains player width inside mobile screen */
+      max-width: 95vw;
+      box-sizing: border-box;
       }
-
       .timer-bar {
         bottom: 95px;
       }
       
       .track-info {
-       width: 100px;
-       max-width: 100px;
-       min-width: 100px;
+       width: 70px;
+       max-width: 70px;
+       min-width: 70px;
        }
       .volume-container input[type="range"] {
         width: 45px;
