@@ -827,6 +827,8 @@ function shufflePlaylist(array) {
 
     function playNextOrRandom() {
       const activeList = getActivePlaylist();
+      currentIndex = (currentIndex + 1) % activeList.length;
+      renderTrackChange();
     }
 
     let initialLoad = true;
