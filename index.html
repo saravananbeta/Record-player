@@ -826,17 +826,7 @@ function shufflePlaylist(array) {
     }
 
     function playNextOrRandom() {
-      if (isShuffleOn) {
-        let randomIndex = Math.floor(Math.random() * playlist.length);
-        if (playlist.length > 1 && randomIndex === currentIndex) {
-          randomIndex = (randomIndex + 1) % playlist.length;
-        }
-        currentIndex = randomIndex;
-        renderTrackChange();
-      } else {
-        currentIndex = (currentIndex + 1) % playlist.length;
-        renderTrackChange();
-      }
+      const activeList = getActivePlaylist();
     }
 
     let initialLoad = true;
