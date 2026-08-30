@@ -553,12 +553,6 @@
       	</div>
       </div> 
       
-    <!-- old code  
-   <div class="track-info">
-      <span id="trackTitle" class="track-title" title="Track Title">Loading Title...</span>
-      <span class="track-sub">Shuffled</span>
-    </div>
-    end of oldc ode -->
    
     <div class="controls">
       <button id="shuffleBtn" onclick="toggleShuffle()" title="Shuffle">&#x1F500;&#xFE0E;</button>
@@ -699,18 +693,7 @@
       fetchTrackTitle();
     }
 
-   /* function fetchTrackTitle() {
-      if (ytPlayer && ytPlayer.getVideoData) {
-        const title = ytPlayer.getVideoData().title;
-        if (title) {
-          document.getElementById('trackTitle').innerText = title;
-          document.getElementById('trackTitle').title = title;
-          return;
-        }
-      }
-      document.getElementById('trackTitle').innerText = `Track ${currentIndex + 1}`;
-    }  */
-
+   
  /*  function fetchTrackTitle(attempts = 0) {
   if (ytPlayer && typeof ytPlayer.getVideoData === 'function') {
     const title = ytPlayer.getVideoData().title;
@@ -825,57 +808,6 @@
 	  getNumbers();
     }
 
-    /* function renderTrackChange() {
-      const activeList = getActivePlaylist();
-      if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-        ytPlayer.loadVideoById(activeList[currentIndex]);
-        updateUI();
-      }
-    } */
-
-/* function renderTrackChange() {
-  const activeList = getActivePlaylist();
-
-  if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-    // Only check if it was explicitly PAUSED by the user before changing tracks
-    const wasPaused = (ytPlayer.getPlayerState && ytPlayer.getPlayerState() === YT.PlayerState.PAUSED);
-
-    ytPlayer.loadVideoById(activeList[currentIndex]);
-
-    if (wasPaused) {
-      setTimeout(() => {
-        if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
-          ytPlayer.pauseVideo();
-          
-          const btn = document.getElementById('playBtn');
-          if (btn) {
-            btn.innerText = '▶';
-            btn.classList.add('is-paused');
-          }
-          const thumb = document.getElementById('trackThumb');
-          if (thumb) {
-            thumb.classList.remove('is-playing');
-          }
-        }
-      }, 50);
-    }
-    updateUI();
-  }
-} */
-   /* function renderTrackChange() {
-  const activeList = getActivePlaylist();
-
-  if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-    // Check if player is paused OR if a pause is already queued from a previous rapid click
-    const state = ytPlayer.getPlayerState ? ytPlayer.getPlayerState() : null;
-    if (state === YT.PlayerState.PAUSED || shouldPauseAfterLoad) {
-      shouldPauseAfterLoad = true;
-    }
-
-    ytPlayer.loadVideoById(activeList[currentIndex]);
-    updateUI();
-  }
-} */
 /*  Copied from Ceylone player */
 function renderTrackChange() {
   const activeList = getActivePlaylist();	
@@ -901,8 +833,6 @@ function renderTrackChange() {
       });
     });  
 
-	
-
     function setVolume(val) {
       if (ytPlayer && ytPlayer.setVolume) {
         ytPlayer.setVolume(val);
@@ -914,38 +844,6 @@ function renderTrackChange() {
       currentIndex = (currentIndex + 1) % activeList.length;
       renderTrackChange();
     } 
-
-   /* function onPlayerStateChange(event) {
-      const btn = document.getElementById('playBtn');
-
-      if (initialLoad && event.data === YT.PlayerState.PLAYING) {
-        initialLoad = false;
-        event.target.pauseVideo();
-        event.target.unMute();
-        event.target.setVolume(100);
-        isAudioMuted = false;
-        btn.innerText = '▶';
-        btn.classList.add('is-paused');
-        updateMuteUI();
-        updateUI();
-        return;
-      }
-
-      if (event.data === YT.PlayerState.PLAYING) {
-        btn.innerText = '⏸';
-        btn.classList.remove('is-paused');
-        document.getElementById('trackThumb').classList.add('is-playing');
-        fetchTrackTitle();
-      } else if (event.data === YT.PlayerState.PAUSED) {
-        btn.innerText = '▶';
-        btn.classList.add('is-paused');
-        document.getElementById('trackThumb').classList.remove('is-playing');
-      } else if (event.data === YT.PlayerState.ENDED) {
-        playNextOrRandom();
-        document.getElementById('trackThumb').classList.remove('is-playing');
-      }
-      getNumbers();
-    }   */
 
 	// Pasting from Ceylon player
 let initialLoad = true;
