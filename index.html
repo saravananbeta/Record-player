@@ -750,6 +750,7 @@
     .catch(() => {
       document.getElementById('trackTitle').innerText = `Track ${currentIndex + 1}`;
     });
+	updateUI();  
 }
 
     function jumpToTrack(val) {
