@@ -717,24 +717,21 @@
   const activeList = getActivePlaylist();
   const videoId = activeList[currentIndex];
 
-  // Instantly set fallback text while fetching
-  //document.getElementById('trackTitle').innerText = `Loading Track ${currentIndex + 1}...`;
-
-  fetch(`https://noembed.com/embed?dataType=json&url=https://www.youtube.com/watch?v=${videoId}`)
-    .then(response => response.json())
-    .then(data => {
-      if (data.title) {
-        document.getElementById('trackTitle').innerText = data.title;
-        document.getElementById('trackTitle').title = data.title;
-      } else {
-        document.getElementById('trackTitle').innerText = `Track ${currentIndex + 1}`;
-      }
-    })
-    .catch(() => {
-      document.getElementById('trackTitle').innerText = `Track ${currentIndex + 1}`;
-    });  
+  fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`)
+  .then(response => {
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  })
+  .then(data => {
+    const title = data.title || `Track ${currentIndex + 1}`;
+    document.getElementById('trackTitle').innerText = title;
+    document.getElementById('trackTitle').title = title;
+  })
+  .catch(() => {
+    document.getElementById('trackTitle').innerText = `Track ${currentIndex + 1}`;
+  });
 }
-
+  
     function jumpToTrack(val) {
       let num = parseInt(val, 10);
       if (isNaN(num)) return;
