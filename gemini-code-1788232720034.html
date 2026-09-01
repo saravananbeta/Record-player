@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Record Player</title>
+  
+  <!-- Cursive Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      background-color: transparent;
+      color: #fff;
+    }
+
+    body {
+      background-color: #000;
+      font-family: sans-serif;
+    }
+
+    /* Fullscreen Background Image */
+    .bg-image {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover !important;
+      object-position: top center;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Cursive Title at Top Left */
+    .app-header {
+      position: fixed;
+      top: 25px;
+      left: 35px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .app-header h1 {
+      font-family: 'Great Vibes', 'Brush Script MT', cursive;
+      font-size: 3.4rem;
+      font-weight: 400;
+      color: #ffb703;
+      text-shadow: 0 3px 12px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.8);
+      line-height: 1;
+    }
+
+    /* Top Right Container for Clock & Mute Button */
+    .top-right-container {
+      position: fixed;
+      top: 25px;
+      right: 35px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    /* Digital Time Display at Top Right */
+    .time-display {
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+      pointer-events: none;
+    }
+
+    /* Mute Button below Clock */
+    .mute-btn {
+      display: none;
+      background: rgba(0, 0, 0, 0.6);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .mute-btn:hover {
+      background: rgba(0, 0, 0, 0.85);
+    }
+
+    /* Centered Container for Sleep Timer above the Player */
+    .timer-bar {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Sleep Timer Button Styling */
+    #sleepBtn {
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #fff;
+      font-size: 0.8rem;
+      padding: 6px 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    #sleepBtn:hover {
+      color: #ffb703;
+      border-color: #ffb703;
+    }
+
+    /* Sleep Menu Popup Options */
+    .timer-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .sleep-menu {
+      display: none;
+      position: absolute;
+      bottom: 100% !important;
+      left: 50%;
+      transform: translate(-50%, -18px) !important;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 6px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      flex-direction: column;
+      gap: 4px;
+      min-width: 110px;
+      z-index: 20;
+    }
+
+    .sleep-menu.is-open {
+      display: flex;
+    }
+
+    .sleep-menu button {
+      background: transparent;
+      border: none;
+      color: #fff;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .sleep-menu button:hover {
+      background: #ffb703;
+      color: #000;
+    }
+
+    
+    /* Base Player Bar (Desktop & Laptops) */
+    /* Unified Player Bar */
+.player-bar {
+  position: fixed;
+  bottom: 35px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  max-width: 580px;
+  box-sizing: border-box;
+  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  gap: 6px;
+}
+
+/* Top Row Layout */
+.player-top-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+}
+
+.track-info {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.track-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Bottom Row Metadata Line */
+.meta-details-row {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.75);
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+    /* Enlarge volume slider on desktop */
+    .volume-container input[type="range"] {
+      width: 80px;
+    }
+
+    /* Thumbnail inside the player */
+    .thumb {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid #ffb703;
+      flex-shrink: 0;
+      animation: slowRotate 8s linear infinite;
+      animation-play-state: paused;
+    }
+
+    .thumb.is-playing {
+      animation-play-state: running;
+    }   
+
+    @keyframes slowRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Truncate long titles with an ellipsis (...) */
+    .track-title {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+      width: 100%;
+      line-height: 1.2;
+    }
+
+    .track-sub {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.68rem;
+      display: block;
+      vertical-align: middle;
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+
+    .controls {
+      display: flex;
+      margin-left: auto;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .controls button {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #ffffff;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease;
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      outline: none !important;
+    }
+
+    .controls button:focus,
+    .controls button:active {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Standard control buttons hover (desktop only) */
+    @media (hover: hover) and (pointer: fine) {
+      .controls button:hover {
+        background: #ffb703 !important;
+        color: #000000 !important;
+      }
+    }
+
+    .controls button.is-pressed,
+    .controls button.is-active {
+      background: #ffb703 !important;
+      color: #000000 !important;
+    }   
+
+    .volume-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      margin-left: 2px;
+      flex-shrink: 0;
+    }
+
+    .volume-container input[type="range"] {
+      width: 60px;
+      accent-color: #ffb703;
+      cursor: pointer;
+    }
+
+    /* Playing State (|| appearing): White text on semi-transparent background */
+    #playBtn:not(.is-paused),
+    #playBtn:not(.is-paused):focus,
+    #playBtn:not(.is-paused):focus-visible,
+    #playBtn:not(.is-paused):active {
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: #ffffff !important;
+      outline: none !important;
+      box-shadow: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    /* Playing State (Desktop Hover Only): Black text on yellow background */
+    @media (hover: hover) and (pointer: fine) {
+      #playBtn:not(.is-paused):hover {
+        background: #ffb703 !important;
+        color: #000000 !important;
+      }
+    }
+
+    /* Paused State (> appearing): Black text on yellow background across all states */
+    #playBtn.is-paused,
+    #playBtn.is-paused:hover,
+    #playBtn.is-paused:focus,
+    #playBtn.is-paused:focus-visible,
+    #playBtn.is-paused:active {
+      background: #ffb703 !important;
+      color: #000000 !important;
+      outline: none !important;
+      box-shadow: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    /* YouTube Link pinned to the right of player bar on desktop */
+    /* Update the YouTube link CSS */
+.yt-link-text {
+  position: fixed;
+  right: 35px;
+  bottom: 25px;
+  left: auto;
+  margin-left: 0;
+  transform: none;
+  white-space: nowrap;
+  z-index: 100;
+  color: #ffb703;
+  text-decoration: underline;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+  transition: color 0.2s ease;
+}
+
+.yt-link-text:hover {
+  color: #ffffff;
+}
+    /* Fixed Audio Engine Size for YouTube Iframe API execution */
+    .audio-engine {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 200px;
+      height: 200px;
+      opacity: 0.001;
+      pointer-events: none;
+      z-index: -10;
+    }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 600px) {
+      .bg-image {
+        object-fit: cover !important;
+        object-position: bottom left !important;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .app-header {
+        top: 15px;
+        left: 20px;
+      }
+
+      .app-header h1 {
+        font-size: 2.2rem;
+      }
+
+      .top-right-container {
+        top: 20px;
+        right: 20px;
+      }
+
+      .time-display {
+        font-size: 0.85rem;
+      }
+
+      #prevBtn {
+        display: none !important;
+      }
+
+      .listener-count {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #ffffff;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+        pointer-events: none;
+      }
+    
+      .timer-bar {
+        bottom: 95px;
+      }
+
+      .player-bar {
+    bottom: 45px;
+    width: 94vw;
+    padding: 10px 14px;
+    border-radius: 24px;
+  }
+
+  /* Hide vertical stacked text on left side */
+  .track-info .track-sub {
+    display: none !important;
+  }
+
+  .track-info {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex-grow: 1;
+  }
+
+  /* Reveal and format bottom horizontal text line */
+  .meta-details-mobile {
+    display: block !important;
+    width: 100%;
+    text-align: center;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 6px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+       .track-info {
+        width: 60px;
+        max-width: 60px;
+        min-width: 60px;
+      }
+
+      .volume-container input[type="range"] {
+        width: 60px;
+      }
+
+      .yt-link-text {
+        position: fixed;
+        left: 50%;
+        bottom: 12px;
+        margin-left: 0;
+        transform: translateX(-50%);
+        font-size: 0.75rem;
+      }
+      .yt-link-text {
+    position: fixed;
+    right: 20px;
+    bottom: 15px;
+    left: auto;
+    transform: none;
+    font-size: 0.75rem;
+  }
+    /* Hide mobile details container on desktop */
+.meta-details-mobile {
+  display: none;
+}
+ @media (max-width: 600px) {
+
+.player-bar {
+    bottom: 45px;
+    width: 95vw;
+    padding: 8px 14px;
+    border-radius: 20px;
+  }
+
+  .track-info {
+    max-width: 110px;
+  }
+
+  .controls {
+    flex-shrink: 0;
+    gap: 4px;
+  }
+
+  .controls button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .volume-container input[type="range"] {
+    width: 45px;
+  }
+
+  .meta-details-row {
+    font-size: 0.7rem;
+  }
+
+ }
+
+  </style>
+</head>
+<body>
+ 
+  <!-- Background Image -->
+  <picture>
+    <source media="(max-width: 600px)" srcset="Record_player_mobile_bg.jpg" />
+    <img src="Record_player_bg.jpg" alt="Background" class="bg-image" />
+  </picture>
+
+  <!-- Title -->
+  <header class="app-header">
+    <h1>Record Player Days</h1>
+  </header>
+
+  <!-- Time & Mute -->
+  <div class="top-right-container">
+    <div id="clockDisplay" class="time-display">00:00</div>
+    <div id="listenerCount" class="listener-count">Online: --</div>
+    <button id="muteBtn" class="mute-btn" aria-label="Toggle Sound">
+      <span id="muteIcon">🔇</span>
+    </button>
+  </div>
+
+  <!-- Sleep Timer Bar -->
+  <div class="timer-bar">
+    <div class="timer-container">
+      <div id="sleepMenu" class="sleep-menu">
+        <button onclick="setTimer(30)">30 mins</button>
+        <button onclick="setTimer(45)">45 mins</button>
+        <button onclick="setTimer(60)">60 mins</button>
+        <button onclick="setTimer(0)" style="color: #ff6b6b;">Turn off</button>
+      </div>
+      <button id="sleepBtn" onclick="toggleSleepMenu()" style="position: relative; transform: translateY(-15px); z-index: 9999;">🌙 Sleep timer</button>
+    </div>
+  </div>
+
+ 
+  <!-- Single Player Container -->
+  <div class="player-bar">
+  <!-- Top Row: Thumbnail, Title, Controls, Volume -->
+  <div class="player-top-row">
+    <img id="trackThumb" src="" alt="Thumb" class="thumb" />
+
+    <div class="track-info">
+      <div class="track-title" id="trackTitle">Title</div>
+    </div>  
+
+    <div class="controls">
+      <button id="shuffleBtn" onclick="toggleShuffle()" title="Shuffle">&#x1F500;&#xFE0E;</button>
+      <button id="prevBtn" onclick="prevTrack(event)" title="Previous">◀◀</button>
+      <button id="playBtn" onclick="togglePlay()" title="Play/Pause">▶</button>
+      <button onclick="nextTrack(event)" title="Next">▶▶</button>
+    </div>
+
+    <div class="volume-container">
+      <span>🔊</span>
+      <input type="range" id="volumeSlider" min="0" max="100" value="80" oninput="setVolume(this.value)" />
+    </div>
+  </div>
+
+  <!-- Bottom Row: Metadata (Singer • Year • Track Count / Shuffle) -->
+  <div id="playerMeta" class="meta-details-row"></div>
+</div>
+
+   <!-- YouTube Playlist Link -->
+  <a href="https://www.youtube.com/playlist?list=PLKSjwCo_iCIQ&si=nY1K75Vzp0RLT9Dl" target="_blank" class="yt-link-text" rel="noopener noreferrer">Listen on YouTube</a>
+
+  <div id="player" class="audio-engine"></div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('clockDisplay').innerText = `${hours}:${minutes}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    const originalPlaylist = [
+      "ovFi6AcOw-c", "ZMXB5MKiabw", "-nrnGjxOLA0", "pOU-abdx0b4", "cBkPFtb1sMQ", "4Ts2ZuaPRkk", "-Bi1iST7EWE",
+      "g9cLHP1RE4k", "ONHG8_zF9K0", "HZdZLdE5KBA", "a-ATN4ZhMos", "nBvIsNfFSZM", "uoJc1hBOUH4", "HpMshzNxdoA", "Jn2IUAHfjOo",
+      "D3kWLpgkeDM", "W2M7CF7sRrU", "X1ojBdibGv4", "0H4Ai65Vvck", "k2updOWY6Dk", "_n9TkjMAQm4", "D-_VfDf2NTk", "Qs3B_1fyGJM",
+      "CzBolio3q8k", "vCnGatVR25A", "Lwstbkko8ko", "7BiawO9Lba8", "O3JWTBTbw3w", "aDpj9aU5rJs", "lGJqrHBkKsw", "AZXIWu7kjUE",
+      "eQG8n0oGYg0", "Z-jnWdjcFbU", "EsTkKsxGL4o", "bliK9cv1-x0", "q3Wm0Y4sV2o", "p4Vn4u-A43w", "JzqGvLA72ac", "DNmVHa3VdNQ",
+      "aOK112Wu2UQ", "rmW-5Se0Rvo", "GVxroWnBMQ0", "s4TdHTtuVQ8", "m7HkVlOyoiU", "KDDAilTlXP4", "z_xNn0YKFpQ", "cVPns9GjtU8",
+      "YsKCM8xYBPQ", "yPlsftoiaE0", "R3EqbeOeZEg", "WY71us627uA", "8eKCa8KDHAU", "N0VRo8cjDeg", "iZnzI4BWY4c", "KCRU7d2im8g"
+    ];
+
+   const localPlaylistData = {
+"ZMXB5MKiabw": {"title": "Thamizhukkum Amuthendru", "Singer": "P. Susheela", "Year": "1965"},
+"ovFi6AcOw-c": {"title": "Avalukkenna Azhagiya", "Singer": "L.R. Eswari", "Year": "1964"},
+"pOU-abdx0b4": {"title": "Neerodum Vaigaiyile", "Singer": "T.M. Soundararajan, P. Susheela", "Year": "1963"},
+"cBkPFtb1sMQ": {"title": "Unnai Kaanatha Kannum", "Singer": "P. Susheela", "Year":"1965"},
+"4Ts2ZuaPRkk": {"title": "Kodi Assainthathum", "Singer": "Susheela, T.M. Soundararajan",  "Year": "1962"},
+
+"g9cLHP1RE4k": {"title": "Poga Poga", "Singer": "P B Srinivas,P Susheela", "Year": "1965"},
+"Tg_ejTHZRp8": {"title": "Nallavarkellam Satchigal", "Singer": "T.M. Soundararajan", "Year": "1978"},
+"HZdZLdE5KBA": {"title": "Mayakkamaa Kalakkama", "Singer": "P B Sreenivas", "Year": "1962"},
+"uoJc1hBOUH4": {"title": "Kallellam Manikka", "Singer": "T.M. Soundararajan, L.R. Eswari", "Year": "1962"},
+"HpMshzNxdoA": {"title": "Naanamo", "Singer": " T.M. Soundararajan, P. Susheela", "Year": "1965"},
+
+"Jn2IUAHfjOo": {"title": "Amaithiyaana Nadhiyinilae", "Singer": "T.M. Soundararajan, P. Susheela", "Year": "1964"},
+"W2M7CF7sRrU": {"title": "Pattum Naane", "Singer": "T M Soundarrajan", "Year": "1965"},
+"X1ojBdibGv4": {"title": "Thedinen Vanthathu", "Singer": "P. Susheela", "Year": "1967"},
+"KCRU7d2im8g": {"title": "Kalyana Naal Paarkka", "Singer": "T M Sounderarajan · P Susheela", "Year": "1966"},
+"iZnzI4BWY4c": {"title": "Vaazha Ninaiththaal", "Singer": "P. Susheela", "Year": "1962"},
+
+"N0VRo8cjDeg": {"title": "Ilamai Koluvirukkum", "Singer": "P.B.Sreenivas", "Year": "1965"},
+"8eKCa8KDHAU": {"title": "Athai Magal", "Singer": "P Susheela", "Year": "1964"},
+"WY71us627uA": {"title": "Oru Naal Pothuma", "Singer": "Dr. M. Balamuralikrishna", "Year": "1965"},
+"yPlsftoiaE0": {"title": "Malarndhum Malaradha", "Singer": "P. Susheela,  T.M. Soundararajan", "Year": "1961"},
+"YsKCM8xYBPQ": {"title": "Kanna Karumainira Kanna", "Singer": "P.susheela", "Year": "1963"},
+
+
+"cVPns9GjtU8": {"title": "Manithan Enbavan", "Singer": "P B Sreenivas", "Year": "1962"},
+"z_xNn0YKFpQ": {"title": "Kannana Kannanukku", "Singer": "Dr. Sirkazhi S. Govindarajan", "Year": "1962"},
+"KDDAilTlXP4": {"title": "Andru Vanthathum", "Singer": "T M Sounderarajan · P Susheela", "Year": "1963"},
+"m7HkVlOyoiU": {"title": "Chittukkuruvi", "Singer": "P. Susheela", "Year": "1964"},
+"s4TdHTtuVQ8": {"title": "kathoduthan Naan", "Singer": "L.R. Eswari", "Year": "1972"}, 
+
+"GVxroWnBMQ0": {"title": "Aalaya Maniyin", "Singer": "P. Susheela", "Year": "1961"},
+"rmW-5Se0Rvo": {"title": "Kallelaam Maanikka", "Singer": "T M Soundararajan", "Year": "1962"},
+"aOK112Wu2UQ": {"title": " Naan Mandhoppil", "Singer": "T M Sounderarajan · L.R. Eswari", "Year": "1965"},
+"DNmVHa3VdNQ": {"title": "Amuthai Poziyum Nilave", "Singer": "P Susheela", "Year": "1957"},
+"JzqGvLA72ac": {"title": "Iravu Varum", "Singer": "T M Sounderarajan", "Year": "1965"},
+
+"q3Wm0Y4sV2o": {"title": "Kannpona Pokkile", "Singer": "T M Sounderarajan", "Year": "1965"},
+"xqtlPc5WjNI": {"title": "Paarthal Pasumaram", "Singer": "T M Sounderarajan", "Year": "1965"},
+"EsTkKsxGL4o": {"title": "Naan Pesa Ninaippathellam", "Singer": "T. M. Soundararajan · P. Susheela", "Year": "1961"},
+"Z-jnWdjcFbU": {"title": "Aha Mella Nada", "Singer": "T. M. Soundararajan", "Year": "1964"},
+"eQG8n0oGYg0": {"title": "Yaar Andha Nilavu", "Singer": "T M Sounderarajan", "Year": "1965"},
+
+"AZXIWu7kjUE": {"title": "Partha Nyaabagam", "Singer": "P. Susheela", "Year": "1964"},
+"lGJqrHBkKsw": {"title": "Thullatha Manamum", "Singer": "Jikki", "Year": "1959"},
+"aDpj9aU5rJs": {"title": "Gangaikarai Thottam", "Singer": "P Susheela", "Year": "1963"},
+"O3JWTBTbw3w": {"title": "Ninaippathellaam Nadanthu", "Singer": "P.B. Sreenivas", "Year": "1962"},
+"7BiawO9Lba8": {"title": "Naan Paartthathille", "Singer": "T.M. Soundararajan, P. Susheela", "Year": "1966"},
+
+"Lwstbkko8ko": {"title": "Poojaikku Vantha Malare", "Singer": "P. B. Sreenivas, S.Janaki", "Year": "1962"},
+"vCnGatVR25A": {"title": "Oho Endhan Baby", "Singer": "Anupama Deshapande, P. B. Sreenivas", "Year": "1961"},
+"CzBolio3q8k": {"title": "Anubhavam Pudhumai", "Singer": "P B Sreenivas, P Susheela", "Year": "1964"},
+"Qs3B_1fyGJM": {"title": "Thottal Poo Malarum", "Singer": "T. M. Soundararajan, P. Susheela", "Year": "1964"},
+"D-_VfDf2NTk": {"title": "Thookkam Un Kangalai", "Singer": "S. Janaki", "Year": "1962"},
+
+"k2updOWY6Dk": {"title": "Maalai Pozhuthin", "Singer": "P. Susheela", "Year": "1961"},
+"0H4Ai65Vvck": {"title": "Atho Andha Paravaipola", "Singer": "T M Sounderarajan", "Year": "1965"},
+
+"-nrnGjxOLA0": {"title": "Palinginaal Oru", "Singer": "L. R. Eswari", "Year": "1966"},
+"-Bi1iST7EWE": {"title": "Athai Madi", "Singer": "P. Susheela", "Year": "1963"},
+"ONHG8_zF9K0": {"title": "Unnai Onru Ketpen", "Singer": "P. Susheela", "Year": "1964"},
+"a-ATN4ZhMos": {"title": "Aadamal Aadugiren", "Singer": "P. Susheela", "Year": "1960"},
+
+"nBvIsNfFSZM": {"title": "Kumari Pennin Ullatthile", "Singer": "P. Susheela, T.M. Soundararajan", "Year": "1965"},
+"D3kWLpgkeDM": {"title": "Andhanaal Nyapagam", "Singer": "T.M.S, Major Sunderarajan", "Year": "1968"},
+"p4Vn4u-A43w": {"title": "Naalai Intha", "Singer": "P. Susheela", "Year": "1968"},
+"bliK9cv1-x0": {"title": "Paalum Pazhamamum", "Singer": "T. M. Soundararajan", "Year": "1961"},
+"R3EqbeOeZEg": {"title": "Kodi Assainthathum", "Singer": "T. M. Soundararajan, P. Susheela", "Year": "1962"},
+
+"_n9TkjMAQm4": {"title": "Sirithu Sirithu", "Singer": "T. M. Soundararajan, P. Susheela", "Year": "1961"},
+
+};
+
+    function shufflePlaylist(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    // Separate copies so shuffling doesn't mutate original
+    const shuffledList = [...originalPlaylist];
+    shufflePlaylist(shuffledList);
+
+    let isShuffleOn = false;    
+    let currentIndex = 0;    
+    let ytPlayer;
+    let isAudioMuted = true;
+
+    function getActivePlaylist() {
+      return isShuffleOn ? shuffledList : originalPlaylist;
+    }
+
+    function onYouTubeIframeAPIReady() {
+      const activeList = getActivePlaylist();
+      ytPlayer = new YT.Player('player', {
+        height: '1',
+        width: '1',
+        videoId: activeList[currentIndex],
+        playerVars: { 
+          'autoplay': 1,
+          'mute': 1,
+          'controls': 0,
+          'playsinline': 1
+        },
+        events: {
+          'onReady': function(event) {
+            event.target.mute();
+            event.target.setVolume(50);
+            updateMuteUI();
+            updateUI();
+          },
+          'onStateChange': onPlayerStateChange,
+          'onError': onPlayerError
+        }
+      });
+    }    
+
+    document.addEventListener('click', function unmuteOnFirstClick(e) {
+      if (e.target.closest('#muteBtn')) return;
+      if (isAudioMuted) {
+        isAudioMuted = false;
+        if (ytPlayer && typeof ytPlayer.unMute === 'function') {
+          ytPlayer.unMute();
+          ytPlayer.setVolume(100);
+        }
+        updateMuteUI();
+      }
+    }, { once: true });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const muteBtn = document.getElementById('muteBtn');
+      if (muteBtn) {
+        muteBtn.addEventListener('click', function() {
+          isAudioMuted = !isAudioMuted;
+          if (ytPlayer && typeof ytPlayer.unMute === 'function') {
+            if (isAudioMuted) {
+              ytPlayer.mute();
+            } else {
+              ytPlayer.unMute();
+              ytPlayer.setVolume(100);
+            }
+          }
+          updateMuteUI();
+        });
+      }
+    });
+
+    function updateMuteUI() {
+      const muteIcon = document.getElementById('muteIcon');
+      const muteBtn = document.getElementById('muteBtn');
+      if (!muteIcon) return;
+
+      if (isAudioMuted) {
+        muteIcon.textContent = '🔇';
+        if (muteBtn) muteBtn.classList.add('is-muted');
+      } else {
+        muteIcon.textContent = '🔊';
+        if (muteBtn) muteBtn.classList.remove('is-muted');
+      }
+    }
+
+    if (window.YT && window.YT.Player) {
+      onYouTubeIframeAPIReady();
+    }
+    
+    function updateUI() {
+      const activeList = getActivePlaylist();
+      const id = activeList[currentIndex];
+      document.getElementById('trackThumb').src = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+      fetchTrackTitle();
+    }
+
+        
+      function fetchTrackTitle() {
+  try {
+    const activeList = getActivePlaylist();
+    const videoId = activeList[currentIndex]; 
+    const track = localPlaylistData[videoId];
+
+    const shuffleIcon = isShuffleOn ? '\u{1F500}' : '\u{27A1}';
+    const trackNumber = currentIndex + 1;
+    const totalTracks = activeList.length;
+
+    if (track) {
+      document.getElementById('trackTitle').innerText = track.title;
+      document.getElementById('trackTitle').title = track.title;
+
+      // Single bottom row text across all viewports
+      const metaElem = document.getElementById('playerMeta');
+      if (metaElem) {
+        metaElem.innerText = `${track.Singer} • ${track.Year} • ${trackNumber}/${totalTracks} ${shuffleIcon}`;
+      }
+    }
+  } catch (err) {
+    console.error("Error inside fetchTrackTitle:", err);
+  }
+}
+
+      function jumpToTrack(val) {
+      let num = parseInt(val, 10);
+      if (isNaN(num)) return;
+
+      const activeList = getActivePlaylist();
+      if (num < 1) num = 1;
+      if (num > activeList.length) num = activeList.length;
+
+      currentIndex = num - 1;
+      renderTrackChange();
+    }
+
+    function togglePlay() {
+      if (!ytPlayer) return;
+
+      const playBtn = document.getElementById('playBtn');
+      if (playBtn) playBtn.blur();
+
+      const state = ytPlayer.getPlayerState();
+      if (state === YT.PlayerState.PLAYING) {
+        ytPlayer.pauseVideo();
+      } else {
+        ytPlayer.playVideo();
+      }
+      updateUI();
+    }
+
+    function toggleShuffle() {
+      isShuffleOn = !isShuffleOn;
+      const btn = document.getElementById('shuffleBtn');
+      if (btn) {
+        btn.classList.toggle('is-active', isShuffleOn);
+        btn.blur();
+      }
+      renderTrackChange();
+      if (!ytPlayer) return; ytPlayer.pauseVideo(); setTimeout(() => ytPlayer.playVideo(), 1500);
+    }
+
+    function flashButton(btn) {
+      if (!btn || !(btn instanceof HTMLElement)) return;
+      if (btn._timer) clearTimeout(btn._timer);
+      btn.classList.add('is-pressed');
+      btn._timer = setTimeout(function() {
+        btn.classList.remove('is-pressed');
+        btn.blur();
+        if (document.activeElement) {
+          document.activeElement.blur();
+        }
+      }, 1000);
+    }
+
+    function nextTrack(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const btn = e ? (e.currentTarget || e.target) : null;
+      flashButton(btn);
+
+      const activeList = getActivePlaylist();
+      currentIndex = (currentIndex + 1) % activeList.length;
+      renderTrackChange();
+      if (!ytPlayer) return; ytPlayer.pauseVideo(); setTimeout(() => ytPlayer.playVideo(), 1500);
+    }
+
+    function prevTrack(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const btn = e ? (e.currentTarget || e.target) : null;
+      flashButton(btn);
+
+      const activeList = getActivePlaylist();
+      currentIndex = (currentIndex - 1 + activeList.length) % activeList.length;
+      renderTrackChange();
+      if (!ytPlayer) return; ytPlayer.pauseVideo(); setTimeout(() => ytPlayer.playVideo(), 1500);
+    }
+
+    function renderTrackChange() {
+      const activeList = getActivePlaylist();	
+      const id = activeList[currentIndex];
+      const thumb = document.getElementById('trackThumb');
+
+      if (thumb) {
+        thumb.src = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+      }
+
+      if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+        ytPlayer.loadVideoById(id);
+      }
+      updateUI();
+    }
+	  
+    document.addEventListener('DOMContentLoaded', function() {
+      const buttons = document.querySelectorAll('.controls button');
+      buttons.forEach(function(btn) {
+        btn.addEventListener('touchend', function() {
+          setTimeout(() => btn.blur(), 50);
+        });
+      });
+    });  
+
+    function setVolume(val) {
+      if (ytPlayer && ytPlayer.setVolume) {
+        ytPlayer.setVolume(val);
+      }
+    }
+
+    function playNextOrRandom() {
+      const activeList = getActivePlaylist();
+      currentIndex = (currentIndex + 1) % activeList.length;
+      renderTrackChange();
+    } 
+
+    let initialLoad = true;
+    function onPlayerStateChange(event) {
+      const btn = document.getElementById('playBtn');
+
+      if (initialLoad && event.data === YT.PlayerState.PLAYING) {
+        initialLoad = false;
+
+        event.target.pauseVideo();
+        event.target.unMute();
+        event.target.setVolume(100);
+
+        isAudioMuted = false;
+
+        btn.innerText = '▶';
+        btn.classList.add('is-paused');
+
+        updateMuteUI();
+        updateUI(event);
+
+        return;
+      }
+
+      if (event.data === YT.PlayerState.PLAYING) {
+        btn.innerText = '⏸';
+        btn.classList.remove('is-paused');
+        document.getElementById('trackThumb').classList.add('is-playing');
+        fetchTrackTitle();
+
+      } else if (event.data === YT.PlayerState.PAUSED) {
+        btn.innerText = '▶';
+        btn.classList.add('is-paused');
+        document.getElementById('trackThumb').classList.remove('is-playing');
+
+      } else if (event.data === YT.PlayerState.ENDED) {
+        document.getElementById('trackThumb').classList.remove('is-playing');
+        advanceToNextTrack();
+      }
+    }   
+
+    function advanceToNextTrack() {
+      const activeList = getActivePlaylist();  
+      currentIndex = (currentIndex + 1) % activeList.length;
+      renderTrackChange();
+    }
+
+    function onPlayerError(event) {
+      console.warn(`Track ${currentIndex + 1} is unplayable. Skipping...`);
+      playNextOrRandom();
+    }
+    
+    let currentCount = Math.floor(Math.random() * (25 - 10 + 1)) + 10;
+
+    function updateFakeListeners() {
+      const countElem = document.getElementById('listenerCount');
+      if (countElem) {
+        countElem.innerText = `Online: ${currentCount}`;
+        const delta = Math.floor(Math.random() * 5) - 2;
+        currentCount = Math.max(5, currentCount + delta);
+      }
+    }
+    updateFakeListeners();
+    setInterval(updateFakeListeners, 15000);
+
+    /* Sleep Timer Logic */
+    let sleepInterval = null;
+    let timeRemaining = 0;
+
+    function toggleSleepMenu() {
+      const menu = document.getElementById('sleepMenu');
+      menu.classList.toggle('is-open');
+    }
+
+    function setTimer(mins) {
+      const btn = document.getElementById('sleepBtn');
+      document.getElementById('sleepMenu').classList.remove('is-open');
+
+      if (sleepInterval) clearInterval(sleepInterval);
+
+      if (mins === 0) {
+        timeRemaining = 0;
+        btn.innerText = '🌙 Sleep timer';
+        return;
+      }
+
+      timeRemaining = mins * 60;
+      updateTimerDisplay();
+
+      sleepInterval = setInterval(() => {
+        timeRemaining--;
+
+        if (timeRemaining <= 0) {
+          clearInterval(sleepInterval);
+          if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+            ytPlayer.pauseVideo();
+          }
+          btn.innerText = '🌙 Sleep timer';
+        } else {
+          updateTimerDisplay();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const btn = document.getElementById('sleepBtn');
+      const m = Math.floor(timeRemaining / 60);
+      const s = String(timeRemaining % 60).padStart(2, '0');
+      btn.innerText = `⏳ ${m}:${s} left`;
+    }
+
+    document.addEventListener('click', function(e) {
+      const container = document.querySelector('.timer-container');
+      if (container && !container.contains(e.target)) {
+        document.getElementById('sleepMenu').classList.remove('is-open');
+      }
+    });    
+
+    function getNumbers(){ return; } 
+  </script>
+</body>
+</html>
