@@ -433,7 +433,7 @@
         top: 20px;
         right: 20px;
       }
-
+   
       .time-display {
         font-size: 0.85rem;
       }
@@ -441,7 +441,15 @@
       #prevBtn {
         display: none !important;
       }
+      /* Raise the sleep timer container above the taller 2-row mobile player */
+  .timer-bar {
+    bottom: 115px !important;
+  }
 
+  /* Reset any negative transform override on the sleep button */
+   #sleepBtn {
+    transform: translateY(0) !important;
+    }
       .listener-count {
         font-size: 0.8rem;
         font-weight: 500;
@@ -518,6 +526,9 @@
 .meta-details-mobile {
   display: none;
 }
+	
+}
+		
  @media (max-width: 600px) {
   .player-bar {
     bottom: 45px;
