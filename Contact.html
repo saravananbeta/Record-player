@@ -28,11 +28,13 @@
 <body>
 Welcome!
  <form action="https://api.web3forms.com/submit" method="POST">
-    <input type="hidden" name="access_key" value="9483e632-415c-408d-9f54-3564606b99d1">
+   <input type="hidden" name="access_key" value="9483e632-415c-408d-9f54-3564606b99d1">
+   <input type="hidden" name="redirect" value="https://record-player-tamil.vercel.app/thank-you.html">
+   <!-- Other Inputs -->
     <input type="text" name="name" placeholder="Your Name" required>
     <input type="email" name="email" placeholder="Your Mail ID" required>
     <textarea name="comment" placeholder="Your Comment" rows="4" required></textarea>
-    <input type="hidden" name="redirect" value="https://record-player-tamil.vercel.app/thank-you.html">
+    
     <button type="submit">Send</button>
     
   </form>
