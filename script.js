@@ -6,7 +6,7 @@ fetch('data.json')
   .then(data => {
     localPlaylistData = data;
     console.log(data);
-    fetchTrackTitle(); // update title after data loads
+    updateUI(); // update title after data loads
   });
 
 
