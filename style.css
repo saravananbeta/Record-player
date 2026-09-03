@@ -1,0 +1,503 @@
+<style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      background-color: transparent;
+      color: #fff;
+    }
+
+    body {
+      background-color: #000;
+      font-family: sans-serif;
+    }
+
+    /* Fullscreen Background Image */
+    .bg-image {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover !important;
+      object-position: top center;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Cursive Title at Top Left */
+    .app-header {
+      position: fixed;
+      top: 25px;
+      left: 35px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .app-header h1 {
+      font-family: 'Great Vibes', 'Brush Script MT', cursive;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-size: 3.4rem;
+      font-weight: 400;
+      color: #ffb703;
+      text-shadow: 0 3px 12px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.8);
+      line-height: 1;
+    }
+
+    /* Top Right Container for Clock & Mute Button */
+    .top-right-container {
+      position: fixed;
+      top: 25px;
+      right: 35px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    /* Digital Time Display at Top Right */
+    .time-display {
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+      pointer-events: none;
+    }
+    .listener-count {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+   }
+    /* Mute Button below Clock */
+    .mute-btn {
+      display: none;
+      background: rgba(0, 0, 0, 0.6);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .mute-btn:hover {
+      background: rgba(0, 0, 0, 0.85);
+    }
+
+    /* Centered Container for Sleep Timer elevated above the Player */
+    .timer-bar {
+      position: fixed;
+      bottom: 138px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Sleep Timer Button Styling */
+    #sleepBtn {
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #fff;
+      font-size: 0.8rem;
+      padding: 6px 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    #sleepBtn:hover {
+      color: #ffb703;
+      border-color: #ffb703;
+    }
+
+    /* Sleep Menu Popup Options */
+    .timer-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .sleep-menu {
+      display: none;
+      position: absolute;
+      bottom: 100% !important;
+      left: 50%;
+      transform: translate(-50%, -10px) !important;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 6px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      flex-direction: column;
+      gap: 4px;
+      min-width: 110px;
+      z-index: 20;
+    }
+
+    .sleep-menu.is-open {
+      display: flex;
+    }
+
+    .sleep-menu button {
+      background: transparent;
+      border: none;
+      color: #fff;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .sleep-menu button:hover {
+      background: #ffb703;
+      color: #000;
+    }
+
+    /* Unified Player Bar - Spacing Reduced Below by Half */
+    .player-bar {
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      width: fit-content;
+      max-width: 420px;
+      box-sizing: border-box;
+      padding: 12px 24px;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 28px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      gap: 8px;
+    }
+
+    /* Track Title Row */
+    .track-title-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      text-align: center;
+    }
+
+    .track-title {
+      font-weight: 500;
+      font-size: 0.80rem;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+      width: 100%;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    /* Controls & Volume Row */
+    .player-controls-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      gap: 14px;
+    }
+
+    /* Bottom Row Metadata Line */
+    .meta-details-row {
+      display: block;
+      width: 100%;
+      text-align: center;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.75);
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Volume slider */
+    .volume-container input[type="range"] {
+      width: 70px;
+    }
+
+    /* Thumbnail inside the player */
+    .thumb {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid #ffb703;
+      flex-shrink: 0;
+      animation: slowRotate 8s linear infinite;
+      animation-play-state: paused;
+    }
+
+    .thumb.is-playing {
+      animation-play-state: running;
+    }   
+
+    @keyframes slowRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .controls button {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #ffffff;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease;
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      outline: none !important;
+    }
+
+    .controls button:focus,
+    .controls button:active {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .controls button:hover {
+        background: #ffb703 !important;
+        color: #000000 !important;
+      }
+    }
+
+    .controls button.is-pressed,
+    .controls button.is-active {
+      background: #ffb703 !important;
+      color: #000000 !important;
+    }   
+
+    .volume-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .volume-container input[type="range"] {
+      width: 70px;
+      accent-color: #ffb703;
+      cursor: pointer;
+    }
+
+    #playBtn:not(.is-paused),
+    #playBtn:not(.is-paused):focus,
+    #playBtn:not(.is-paused):focus-visible,
+    #playBtn:not(.is-paused):active {
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: #ffffff !important;
+      outline: none !important;
+      box-shadow: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      #playBtn:not(.is-paused):hover {
+        background: #ffb703 !important;
+        color: #000000 !important;
+      }
+    }
+
+    #playBtn.is-paused,
+    #playBtn.is-paused:hover,
+    #playBtn.is-paused:focus,
+    #playBtn.is-paused:focus-visible,
+    #playBtn.is-paused:active {
+      background: #ffb703 !important;
+      color: #000000 !important;
+      outline: none !important;
+      box-shadow: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    .yt-link-text {
+      position: fixed;
+      right: 35px;
+      bottom: 25px;
+      left: auto;
+      margin-left: 0;
+      transform: none;
+      white-space: nowrap;
+      z-index: 100;
+      color:  #bababa;  /* #ffb703; */
+      text-decoration: none;
+      font-size: 0.65rem;
+      font-weight: 300;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+      transition: color 0.2s ease;
+    }
+
+    .yt-link-text:hover {
+      color: #ffb703; /* #ffffff; */
+    }
+
+	.contact-text {
+      position: fixed;
+      left: 35px;
+      bottom: 25px;
+     /* margin-left: 0;  */
+      transform: none;
+      white-space: nowrap;
+      z-index: 200;
+      color: #bababa;  /* #ffb703; */
+      text-decoration: none;
+      font-size: 0.65rem;
+      font-weight: 300;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+      transition: color 0.2s ease;
+    }
+
+    .contact-text:hover {
+      color: #ffb703; /* #ffffff; */
+    }  
+
+    .audio-engine {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 200px;
+      height: 200px;
+      opacity: 0.001;
+      pointer-events: none;
+      z-index: -10;
+    }
+
+    @media (max-width: 600px) {
+      .bg-image {
+        object-fit: cover !important;
+        object-position: bottom left !important;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .app-header {
+        top: 15px;
+        left: 20px;
+      }
+
+      .app-header h1 {
+        font-size: 2.2rem;
+      }
+
+      .top-right-container { /* Lowering in mobile */
+        top: 55px;
+        right: 20px;
+      }
+
+      .time-display {
+        font-size: 0.85rem;
+      }
+
+      #prevBtn {
+        display: none !important;
+      }
+      
+      .listener-count {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #ffffff;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+        pointer-events: none;
+      }
+    
+      .timer-bar {
+        bottom: 133px;
+      }
+
+      .thumb {
+        width: 36px;
+        height: 36px;
+      }	
+
+      .player-bar {
+        bottom: 20px;
+        width: 90vw;
+        max-width: 360px;
+        padding: 10px 16px;
+        border-radius: 20px;
+      }
+
+      .controls {
+        flex-shrink: 0;
+        gap: 6px;
+      }
+
+      .controls button {
+        width: 26px;
+        height: 26px;
+      }
+
+      .volume-container input[type="range"] {
+        width: 50px;
+      }
+
+      .meta-details-row {
+        font-size: 0.7rem;
+      }
+
+      .yt-link-text {
+        position: fixed;
+        right: 8px;
+        bottom: 18px;
+        left: auto;
+        transform: none;
+        font-size: 0.75rem;
+      }
+	   .contact-text {
+        position: fixed;
+        left: 8px;
+		right: auto;
+        bottom: 18px;
+        transform: none;
+        font-size: 0.75rem;
+      }	
+    }
+  </style>
