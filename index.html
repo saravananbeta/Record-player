@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	
+
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>Record Player</title>
+ <link rel ="stylesheet" href="style.css">
+
+	
+  <!-- Cursive Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+
+  
+</head>
+<body>
+
+
+ 
+  <!-- Background Image -->
+  <picture>
+    <source media="(max-width: 600px)" srcset="Record_player_mobile_bg.jpg" />
+    <img src="Record_player_bg.jpg" alt="Background" class="bg-image" />
+  </picture>
+
+  <!-- Title -->
+  <header class="app-header">
+    <h1>Record Player Days</h1>
+  </header>
+
+  <!-- Time & Mute -->
+  <div class="top-right-container">
+    <div id="clockDisplay" class="time-display">00:00</div>
+    <div id="listenerCount" class="listener-count">Online: --</div>
+    <button id="muteBtn" class="mute-btn" aria-label="Toggle Sound">
+      <span id="muteIcon">🔇</span>
+    </button>
+  </div>
+
+  <!-- Elevated Sleep Timer Bar -->
+  <div class="timer-bar">
+    <div class="timer-container">
+      <div id="sleepMenu" class="sleep-menu">
+        <button onclick="setTimer(30)">30 mins</button>
+        <button onclick="setTimer(45)">45 mins</button>
+        <button onclick="setTimer(60)">60 mins</button>
+        <button onclick="setTimer(0)" style="color: #ff6b6b;">Turn off</button>
+      </div>
+      <button id="sleepBtn" onclick="toggleSleepMenu()">🌙 Sleep timer</button>
+    </div>
+  </div>
+
+  <!-- Single Player Container -->
+  <div class="player-bar">
+    <!-- Row 1: Song Title Centered Above Controls -->
+    <div class="track-title-row">
+      <div class="track-title" id="trackTitle">Title</div>
+    </div>
+
+    <!-- Row 2: Thumbnail, Controls, Volume (Centered) -->
+    <div class="player-controls-row">
+      <img id="trackThumb" src="" alt="Thumb" class="thumb" />
+
+      <div class="controls">
+        <button id="shuffleBtn" onclick="toggleShuffle()" title="Shuffle">&#x1F500;&#xFE0E;</button>
+        <button id="prevBtn" onclick="prevTrack(event)" title="Previous">◀◀</button>
+        <button id="playBtn" onclick="togglePlay()" title="Play/Pause">▶</button>
+        <button onclick="nextTrack(event)" title="Next">▶▶</button>
+      </div>
+
+      <div class="volume-container">
+        <span>🔊</span>
+        <input type="range" id="volumeSlider" min="0" max="100" value="80" oninput="setVolume(this.value)" />
+      </div>
+    </div>
+
+    <!-- Row 3: Metadata (Singer • Year • Track Count / Shuffle) -->
+    <div id="playerMeta" class="meta-details-row"></div>
+  </div>
+
+  <!-- YouTube Playlist Link -->
+  <a href="https://www.youtube.com/playlist?list=PLKSjwCo_iCIQ&si=nY1K75Vzp0RLT9Dl" target="_blank" class="yt-link-text" rel="noopener noreferrer">Listen on YouTube.</a>
+  <a href="/Contact.html" target="_blank" class="contact-text" rel="noopener noreferrer">Suggest a song!</a>
+  
+  <div id="player" class="audio-engine"></div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="playlist.js"></script>
+  <script src="script.js"></script>
+
+ 
+</body>
+</html>
