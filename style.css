@@ -95,7 +95,7 @@
     /* Centered Container for Sleep Timer elevated above the Player */
     .timer-bar {
       position: fixed;
-      bottom: 145px;
+      bottom: 137px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 10;
