@@ -434,7 +434,10 @@
       #prevBtn {
         display: none !important;
       }
-      
+      .control-btn {
+      width: 30px;
+      height: 30px;
+	  }
       .listener-count {
         font-size: 0.8rem;
         font-weight: 500;
