@@ -289,8 +289,8 @@
 
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: none;
   background: none;
@@ -299,6 +299,11 @@
   color: #ffffff;               /* change to your color */
   cursor: pointer;
   transition: transform 0.12s ease, background 0.2s, opacity 0.2s;
+}
+.control-btn svg {
+  display: block;
+  width: 18px;
+  height: 18px;
 }
 
 
@@ -470,10 +475,16 @@
       }
 
       .controls button {
-        width: 26px;
-        height: 26px;
+        width: 30px;
+        height: 30px;
       }
+      .control-btn svg {
+  	display: block;
+ 	width: 16px;
+  	height: 16px;
+	}
 
+		
       .volume-container input[type="range"] {
         width: 50px;
       }
