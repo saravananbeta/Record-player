@@ -415,8 +415,7 @@ function onPlayerStateChange(event) {
         document.getElementById('sleepMenu').classList.remove('is-open');
       }
     });    
-
-  function eraser(videoId) {
+function eraser(videoId) {
  
     const Id = videoId;
     const track = localPlaylistData[Id];
@@ -439,3 +438,5 @@ function onPlayerStateChange(event) {
     }, 5000);
 } 
 
+
+  
