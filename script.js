@@ -36,6 +36,8 @@ fetch('data.json')
     let currentIndex = 0;    
     let ytPlayer;
     let isAudioMuted = true;
+    let toggleTimer = null;
+    let showMovie = false;
 
     function getActivePlaylist() {
       return isShuffleOn ? shuffledList : originalPlaylist;
