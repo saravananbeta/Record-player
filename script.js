@@ -449,7 +449,21 @@ document.addEventListener('keydown', (e) => {
     document.getElementById('playBtn')?.click(); // same as clicking play button
   }
 });
+// Arrow keys for Prev/Next
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
+  if (e.code === 'Space' || e.key === ' ') {
+    e.preventDefault();
+    document.getElementById('playBtn')?.click();
+  } else if (e.code === 'ArrowRight') {
+    e.preventDefault();
+    document.getElementById('nextBtn')?.click();
+  } else if (e.code === 'ArrowLeft') {
+    e.preventDefault();
+    document.getElementById('prevBtn')?.click();
+  }
+});
 
 
   
