@@ -1,4 +1,4 @@
-
+   let lastVolume = parseInt(document.getElementById('volumeSlider')?.value) || 80;
    let localPlaylistData = {};
 
 fetch('data.json')
@@ -58,7 +58,7 @@ fetch('data.json')
         events: {
           'onReady': function(event) {
             event.target.mute();
-            event.target.setVolume(50);
+            event.target.setVolume(lastVolume);
             updateMuteUI();
             updateUI();
           },
@@ -68,35 +68,31 @@ fetch('data.json')
       });
     }    
 
-    document.addEventListener('click', function unmuteOnFirstClick(e) {
-      if (e.target.closest('#muteBtn')) return;
-      if (isAudioMuted) {
-        isAudioMuted = false;
-        if (ytPlayer && typeof ytPlayer.unMute === 'function') {
-          ytPlayer.unMute();
-          ytPlayer.setVolume(100);
-        }
-        updateMuteUI();
-      }
-    }, { once: true });
+      document.addEventListener('click', function unmuteOnFirstClick(e) {
+  if (e.target.closest('#muteBtn')) return;
+  if (isAudioMuted) {
+    isAudioMuted = false;
+    if (ytPlayer && typeof ytPlayer.unMute === 'function') {
+      ytPlayer.unMute();
+      setVolume(lastVolume || 80); // remembers last volume
+    }
+    updateMuteUI();
+  }
+}, { once: true });
 
-    document.addEventListener('DOMContentLoaded', function() {
-      const muteBtn = document.getElementById('muteBtn');
-      if (muteBtn) {
-        muteBtn.addEventListener('click', function() {
-          isAudioMuted = !isAudioMuted;
-          if (ytPlayer && typeof ytPlayer.unMute === 'function') {
-            if (isAudioMuted) {
-              ytPlayer.mute();
-            } else {
-              ytPlayer.unMute();
-              ytPlayer.setVolume(100);
-            }
-          }
-          updateMuteUI();
-        });
-      }
-    });
+
+ // Updated Mute button logic
+  document.getElementById('muteBtn').addEventListener('click', function() {
+  isAudioMuted = !isAudioMuted;
+  if (isAudioMuted) {
+    ytPlayer.mute();
+  } else {
+    ytPlayer.unMute();
+    setVolume(lastVolume); // will now be last value, not 80
+  }
+  updateMuteUI();
+});
+
 
     function updateMuteUI() {
       const muteIcon = document.getElementById('muteIcon');
@@ -293,11 +289,26 @@ shuffleBtn.addEventListener('click', () => {
       });
     });  
 
-    function setVolume(val) {
-      if (ytPlayer && ytPlayer.setVolume) {
-        ytPlayer.setVolume(val);
-      }
+     function setVolume(val) {
+  val = parseInt(val);
+  
+  if (ytPlayer && ytPlayer.setVolume) {
+    ytPlayer.setVolume(val);
+  }
+  
+  // If user drags while muted, remember new value
+  if (isAudioMuted) {
+    if (val > 0) {
+      lastVolume = val; // store 10, not 80
+      // optional: auto-unmute when they drag
+      // isAudioMuted = false;
+      // ytPlayer.unMute();
+      // updateMuteUI();
     }
+  } else {
+    lastVolume = val;
+  }
+}
 
     function playNextOrRandom() {
       const activeList = getActivePlaylist();
@@ -317,7 +328,7 @@ function onPlayerStateChange(event) {
     initialLoad = false;
     event.target.pauseVideo();
     event.target.unMute();
-    event.target.setVolume(100);
+    event.target.setVolume(lastVolume);
     isAudioMuted = false;
     playBtn.classList.remove('playing');
     updateMuteUI();
